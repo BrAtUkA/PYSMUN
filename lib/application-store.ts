@@ -153,9 +153,15 @@ async function saveToSupabase<T extends ApplicationPayload>(application: T, prog
     }).catch(() => undefined);
   }
 
-  if (!(await uploadImage(photoPath, photo))) throw new Error("APPLICATION_PHOTO_STORE_FAILED");
-  if (receipt && receiptPath && !(await uploadImage(receiptPath, receipt))) {
-    await removeUploads([photoPath]);
+  const [photoUploaded, receiptUploaded] = await Promise.all([
+    uploadImage(photoPath, photo),
+    receipt && receiptPath ? uploadImage(receiptPath, receipt) : Promise.resolve(true),
+  ]);
+  if (!photoUploaded || !receiptUploaded) {
+    // Clean up whichever half of the pair actually landed, so a partial
+    // failure never leaves an orphaned file behind.
+    const uploadedPaths = [photoUploaded ? photoPath : null, receiptUploaded && receiptPath ? receiptPath : null].filter((path): path is string => Boolean(path));
+    await removeUploads(uploadedPaths);
     throw new Error("APPLICATION_PHOTO_STORE_FAILED");
   }
 

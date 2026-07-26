@@ -5,6 +5,9 @@ import { trainingCampApplicationSchema } from "@/lib/application-schema";
 import { saveTrainingCampApplication } from "@/lib/application-store";
 
 export const runtime = "nodejs";
+// Turnstile verify + dup checks + two image uploads to Supabase can add up
+// on a slow mobile connection; give it real headroom above the 10s default.
+export const maxDuration = 30;
 
 const attempts = new Map<string, { count: number; resetsAt: number }>();
 
