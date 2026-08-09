@@ -11,7 +11,7 @@ import "@fontsource/instrument-serif/400.css";
 import "@fontsource/instrument-serif/400-italic.css";
 import "./globals.css";
 
-const socialDescription = `Applications are now open for the PYS Bootcamp, ${bootcampFacts.dates} in ${bootcampFacts.city} (deadline ${bootcampFacts.deadline}), and the Campus Ambassador program. Step into the room where ideas become resolutions.`;
+const socialDescription = `Applications are now open for the PYS Bootcamp, ${bootcampFacts.dates} in ${bootcampFacts.city} (deadline ${bootcampFacts.deadline}). Step into the room where ideas become resolutions.`;
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://pysmun.com"),

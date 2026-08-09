@@ -1,7 +1,7 @@
 import { AnimatedCounter } from "@/components/animated-counter";
 import { HeroLetterField } from "@/components/hero-letter-field";
 import { Reveal } from "@/components/reveal";
-import { bootcampFacts, committees, countWords, openOpportunities, opportunities } from "@/lib/content";
+import { applicationStatusLabels, bootcampFacts, committees, countWords, openOpportunities, opportunities } from "@/lib/content";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import styles from "./page.module.css";
@@ -162,7 +162,7 @@ export default function Home() {
             {opportunities.map((item) => (
               <Reveal key={item.id}>
                 <Link className={styles.opportunity} href={item.href}>
-                  <div><span className="status-pill" data-status={item.status}>{item.status === "open" ? "Applications open" : "Coming soon"}</span><h3>{item.title}</h3></div>
+                  <div><span className="status-pill" data-status={item.status}>{applicationStatusLabels[item.status].long}</span><h3>{item.title}</h3></div>
                   <p>{item.description}</p>
                   <span className={styles.circleArrow}><ArrowUpRight /></span>
                 </Link>
@@ -240,8 +240,8 @@ export default function Home() {
           </div>
           <Reveal className={styles.ambassadorCtaWrap}>
             <Link className={styles.ambassadorCta} href="/applications/campus-ambassador" data-tap-feedback>
-              <span>Applications / Campus Ambassador</span>
-              <strong>Become the link.</strong>
+              <span>Applications closed / Campus Ambassador</span>
+              <strong>Next intake to follow.</strong>
               <i><ArrowUpRight size={28} /></i>
             </Link>
           </Reveal>

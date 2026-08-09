@@ -7,14 +7,20 @@ export const siteConfig = {
 
 export type ApplicationStatus = "open" | "coming-soon" | "closed";
 
+export const applicationStatusLabels: Record<ApplicationStatus, { short: string; long: string }> = {
+  open: { short: "Open", long: "Applications open" },
+  "coming-soon": { short: "Coming soon", long: "Coming soon" },
+  closed: { short: "Closed", long: "Applications closed" },
+};
+
 export const bootcampFacts = {
   dates: "August 15–16, 2026",
   datesShort: "August 15–16",
   startDate: "2026-08-15",
   endDate: "2026-08-16",
   city: "Rahim Yar Khan",
-  deadline: "August 12",
-  deadlineDate: "2026-08-12",
+  deadline: "August 14",
+  deadlineDate: "2026-08-14",
   fee: "Rs. 1,000",
   feeAmount: "1000",
   ages: "15–23",
@@ -38,7 +44,7 @@ export const opportunities = [
     title: "Campus Ambassador",
     description: "Represent PYSMUN at your institution and grow a nationwide student diplomacy network.",
     href: "/applications/campus-ambassador",
-    status: "open" as ApplicationStatus,
+    status: "closed" as ApplicationStatus,
     number: "02",
     fee: "Free",
   },
@@ -103,7 +109,7 @@ export const faqs = [
   },
   {
     question: "When do applications close?",
-    answer: `PYS Bootcamp applications close on ${bootcampFacts.deadline}. Campus Ambassador applications have no deadline and stay open. Seats are first-come-first-served, and you will hear from us within 24 hours of applying.`,
+    answer: `PYS Bootcamp applications close on ${bootcampFacts.deadline}. Campus Ambassador applications are closed. Bootcamp seats are first-come-first-served, and you will hear from us within 24 hours of applying.`,
   },
   {
     question: "What will I learn at the PYS Bootcamp?",

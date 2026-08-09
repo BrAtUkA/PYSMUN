@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { Reveal } from "@/components/reveal";
-import { countWords, formatTitleList, openOpportunities, opportunities, upcomingOpportunities } from "@/lib/content";
+import { applicationStatusLabels, countWords, formatTitleList, openOpportunities, opportunities, upcomingOpportunities } from "@/lib/content";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { PageMotionField } from "@/components/page-motion-field";
 
 export const metadata: Metadata = {
-  title: "Apply — PYS Bootcamp & Campus Ambassador",
-  description: "Apply to PYSMUN. PYS Bootcamp and Campus Ambassador applications are open now; Directorate and Delegate opportunities follow soon.",
+  title: "Applications",
+  description: "Apply to the PYS Bootcamp. Campus Ambassador applications are closed; Directorate and Delegate opportunities follow soon.",
 };
 
 const applicationOrder = ["pys-bootcamp", "campus-ambassador", "directorate", "delegate"];
@@ -35,7 +35,7 @@ export default function ApplicationsPage() {
               <Link className="application-tile" href={item.href} aria-label={`View ${item.title}`} data-tap-feedback>
                 <div className="application-tile__content"><p>{item.eyebrow}</p><h2>{item.title}</h2><p>{item.description}</p></div>
                 {"deadline" in item && item.deadline && <p className="application-tile__deadline">Application deadline: {item.deadline}</p>}
-                <div className="application-tile__foot"><span className="status-pill" data-status={item.status}>{item.status === "open" ? "Open" : "Coming soon"}</span><span className="application-tile__foot-end">{"fee" in item && item.fee && <span className="application-tile__fee">{item.fee}</span>}<span className="application-tile__arrow"><ArrowUpRight /></span></span></div>
+                <div className="application-tile__foot"><span className="status-pill" data-status={item.status}>{applicationStatusLabels[item.status].short}</span><span className="application-tile__foot-end">{"fee" in item && item.fee && <span className="application-tile__fee">{item.fee}</span>}<span className="application-tile__arrow"><ArrowUpRight /></span></span></div>
               </Link>
             </Reveal>
           ))}
