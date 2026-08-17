@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { parseApplicationSubmission } from "@/lib/application-photo";
 import { trainingCampApplicationSchema } from "@/lib/application-schema";
 import { saveTrainingCampApplication } from "@/lib/application-store";
+import { opportunities } from "@/lib/content";
 
 export const runtime = "nodejs";
 // Turnstile verify + dup checks + two image uploads to Supabase can add up
@@ -38,6 +39,11 @@ async function verifyTurnstile(token?: string) {
 }
 
 export async function POST(request: Request) {
+  const applicationsOpen = opportunities.some((item) => item.id === "pys-bootcamp" && item.status === "open");
+  if (!applicationsOpen) {
+    return NextResponse.json({ message: "PYS Bootcamp applications are closed." }, { status: 410 });
+  }
+
   if (rateLimited(request)) return NextResponse.json({ message: "Too many attempts. Please try again shortly." }, { status: 429 });
 
   const submission = await parseApplicationSubmission(request, { withReceipt: true });

@@ -5,16 +5,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BrandMark } from "./brand-mark";
+import { openOpportunities } from "@/lib/content";
 
 export function SiteFooter() {
   const pathname = usePathname();
   const isPysBootcampApplication = pathname === "/applications/pys-bootcamp";
   const isApplicationsOverview = pathname === "/applications";
   const cta = isPysBootcampApplication
-    ? { eyebrow: "The experience behind your application", href: "/pys-bootcamp", label: "See what awaits" }
+    ? { eyebrow: "Explore the Bootcamp programme", href: "/pys-bootcamp", label: "See the experience" }
     : isApplicationsOverview
-      ? { eyebrow: "Questions before you apply?", href: "/faq", label: "Find your answer" }
-      : { eyebrow: "The next session begins with you", href: "/applications", label: "Enter the room" };
+      ? { eyebrow: "Questions about future opportunities?", href: "/faq", label: "Find your answer" }
+      : openOpportunities.length > 0
+        ? { eyebrow: "The next session begins with you", href: "/applications", label: "Enter the room" }
+        : { eyebrow: "The next room is taking shape", href: "/applications", label: "See what comes next" };
 
   return (
     <footer className="site-footer">

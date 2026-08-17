@@ -30,7 +30,7 @@ const eventSchema = {
     price: bootcampFacts.feeAmount,
     priceCurrency: "PKR",
     url: "https://pysmun.com/applications/pys-bootcamp",
-    availability: "https://schema.org/InStock",
+    availability: "https://schema.org/SoldOut",
     validThrough: bootcampFacts.deadlineDate,
   },
   image: "https://pysmun.com/opengraph-image.png",
@@ -98,8 +98,8 @@ export default function PysBootcampPage() {
           </Reveal>
           <Reveal className="training-overview__intro" delay={1}>
             <p>The PYS Bootcamp prepares delegates for Model United Nations through interactive workshops, practical activities and expert mentorship.</p>
-            <span className="training-status"><i /> Applications open</span>
-            <p className="training-facts">{bootcampFacts.dates} · {bootcampFacts.city} · {bootcampFacts.fee} · Application deadline: {bootcampFacts.deadline}</p>
+            <span className="training-status" data-status="closed"><i /> Applications closed</span>
+            <p className="training-facts">{bootcampFacts.dates} · {bootcampFacts.city} · Applications closed on {bootcampFacts.deadline}</p>
           </Reveal>
         </div>
 
@@ -114,7 +114,7 @@ export default function PysBootcampPage() {
           </Reveal>
           <Reveal delay={2}>
             <Link className="training-overview__apply" href="/applications/pys-bootcamp">
-              <span>Apply for<br />PYS Bootcamp</span>
+              <span>Applications<br />closed</span>
               <ArrowRight aria-hidden="true" />
             </Link>
           </Reveal>
@@ -225,7 +225,7 @@ export default function PysBootcampPage() {
 
         <Reveal className="camp-outcomes__apply-shell">
           <Link className="camp-outcomes__apply" href="/applications/pys-bootcamp">
-            <span><small><span>Applications open</span><span>{bootcampFacts.fee}</span><span>Application deadline: {bootcampFacts.deadline}</span></small>Take your place <span className="camp-outcomes__apply-tail">in the room.</span></span>
+            <span><small><span>Applications closed</span><span>Closed {bootcampFacts.deadline}</span><span>Future editions to follow</span></small>Current intake <span className="camp-outcomes__apply-tail">has ended.</span></span>
             <ArrowRight aria-hidden="true" />
           </Link>
         </Reveal>

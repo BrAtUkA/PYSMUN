@@ -1,12 +1,14 @@
 import { AnimatedCounter } from "@/components/animated-counter";
 import { HeroLetterField } from "@/components/hero-letter-field";
 import { Reveal } from "@/components/reveal";
-import { applicationStatusLabels, bootcampFacts, committees, countWords, openOpportunities, opportunities } from "@/lib/content";
+import { applicationStatusLabels, committees, countWords, openOpportunities, opportunities } from "@/lib/content";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import styles from "./page.module.css";
 
 export default function Home() {
+  const applicationsOpen = openOpportunities.length > 0;
+
   return (
     <main id="main-content">
       <section className={styles.hero}>
@@ -14,7 +16,7 @@ export default function Home() {
         <div className={`container ${styles.heroGrid}`}>
           <div className={styles.heroCopy}>
             <div className={styles.liveLine}>
-              <span className="status-pill" data-status="open">{countWords[openOpportunities.length]} application{openOpportunities.length === 1 ? " is" : "s are"} now open</span>
+              <span className="status-pill" data-status={applicationsOpen ? "open" : "closed"}>{applicationsOpen ? `${countWords[openOpportunities.length]} application${openOpportunities.length === 1 ? " is" : "s are"} now open` : "Applications for this intake are closed"}</span>
             </div>
             <h1 className={styles.heroTitle}>
               Where voices<br />become <em>resolutions.</em>
@@ -24,9 +26,9 @@ export default function Home() {
             </div>
           </div>
           <div className={styles.heroActions}>
-            <Link className={styles.heroPrimaryCta} href="/applications/pys-bootcamp">
-              <span className={styles.heroCtaMeta}>Applications open · Deadline: {bootcampFacts.deadline}</span>
-              <strong>Enter the PYS Bootcamp</strong>
+            <Link className={styles.heroPrimaryCta} href="/pys-bootcamp">
+              <span className={styles.heroCtaMeta}>Current application intake closed</span>
+              <strong>Explore the PYS Bootcamp</strong>
               <span className={styles.heroCtaIcon}><ArrowUpRight size={18} /></span>
             </Link>
             <Link className={styles.heroDiscover} href="#discover">

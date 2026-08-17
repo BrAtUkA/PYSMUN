@@ -42,7 +42,7 @@ export function SiteHeader() {
       : { href: "/applications", label: "All applications", back: true }
     : isApplicationsHub
       ? { href: "/faq", label: "FAQ", back: false }
-      : { href: "/applications", label: "Apply now", back: false };
+      : { href: "/applications", label: openOpportunities.length > 0 ? "Apply now" : "Applications", back: false };
 
   // The "Applications" nav link is redundant wherever the CTA pill already
   // leads to /applications, and on the applications hub itself (a self-link).
@@ -164,9 +164,9 @@ export function SiteHeader() {
           </div>
           <div className="mobile-menu__closing">
             <p>Inspiring Leaders,<br />Empowering Change</p>
-            <div className="mobile-menu__status">
+            <div className="mobile-menu__status" data-status={openOpportunities.length > 0 ? "open" : "closed"}>
               <span aria-hidden="true" />
-              <p><strong>Applications open</strong>{formatTitleList(openOpportunities)}</p>
+              <p><strong>{openOpportunities.length > 0 ? "Applications open" : "Applications closed"}</strong>{openOpportunities.length > 0 ? formatTitleList(openOpportunities) : "No applications are currently being accepted."}</p>
             </div>
           </div>
         </div>

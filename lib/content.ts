@@ -33,7 +33,7 @@ export const opportunities = [
     title: "PYS Bootcamp",
     description: "Learn the room before you lead it. Interactive training in procedure, speaking, negotiation and resolution writing.",
     href: "/applications/pys-bootcamp",
-    status: "open" as ApplicationStatus,
+    status: "closed" as ApplicationStatus,
     number: "01",
     fee: "Rs. 1,000",
     deadline: bootcampFacts.deadline,
@@ -109,7 +109,7 @@ export const faqs = [
   },
   {
     question: "When do applications close?",
-    answer: `PYS Bootcamp applications close on ${bootcampFacts.deadline}. Campus Ambassador applications are closed. Bootcamp seats are first-come-first-served, and you will hear from us within 24 hours of applying.`,
+    answer: `PYS Bootcamp applications closed on ${bootcampFacts.deadline}. Campus Ambassador applications are also closed. No further applications are being accepted for either current intake.`,
   },
   {
     question: "What will I learn at the PYS Bootcamp?",
@@ -117,6 +117,6 @@ export const faqs = [
   },
   {
     question: "Are Directorate and Delegate applications open?",
-    answer: `Not yet. ${formatTitleList(openOpportunities)} applications are open now. ${formatTitleList(upcomingOpportunities)} opportunities will follow.`,
+    answer: `Not yet. There are no open applications right now. ${formatTitleList(upcomingOpportunities)} opportunities will follow.`,
   },
 ];
