@@ -10,7 +10,6 @@ import { formatTitleList, openOpportunities, siteConfig } from "@/lib/content";
 const links = [
   { href: "/about", label: "About" },
   { href: "/executive-council", label: "Executive Council" },
-  { href: "/pys-bootcamp", label: "PYS Bootcamp" },
   { href: "/committees", label: "Committees" },
   { href: "/applications", label: "Applications" },
 ];
@@ -34,7 +33,7 @@ export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [footerVisible, setFooterVisible] = useState(false);
   const needsRestingSurface = pathname !== "/";
-  const usesSplitFormHeader = pathname === "/applications/pys-bootcamp" || pathname === "/applications/campus-ambassador";
+  const usesSplitFormHeader = pathname === "/applications/pys-bootcamp" || pathname === "/applications/campus-ambassador" || pathname === "/applications/directorate";
   const isApplicationsHub = pathname === "/applications";
   const primaryAction = usesSplitFormHeader
     ? pathname === "/applications/pys-bootcamp"

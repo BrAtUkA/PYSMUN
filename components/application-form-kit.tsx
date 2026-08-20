@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronDown, Copy, TriangleAlert, X } from "lucide-react";
+import { Check, ChevronDown, Copy, FileText, TriangleAlert, X } from "lucide-react";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import { formatPakistaniNationalNumber, parsePakistaniNationalNumber } from "@/lib/contact-validation";
@@ -87,13 +87,14 @@ export function PhoneField<N extends string>({ label, name, value, onChange, err
   );
 }
 
-export function SelectField<N extends string>({ label, name, value, onChange, error, options }: {
+export function SelectField<N extends string>({ label, name, value, onChange, error, options, wide }: {
   label: string;
   name: N;
   value: string;
   onChange: FieldChange<N>;
   error?: string[];
   options: string[][];
+  wide?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
@@ -149,7 +150,7 @@ export function SelectField<N extends string>({ label, name, value, onChange, er
   };
 
   return (
-    <div className="field field--select" ref={rootRef}>
+    <div className={wide ? "field field--select field--wide" : "field field--select"} ref={rootRef}>
       <span id={`${id}-label`}>{label}</span>
       <div className="select-shell">
         <button
@@ -219,7 +220,7 @@ export function TextareaField<N extends string>({ label, name, value, onChange, 
   );
 }
 
-export function ReviewLedger({ rows, photo, receipt }: { rows: [string, string][]; photo: File | null; receipt?: File | null }) {
+export function ReviewLedger({ rows, photo, receipt, cv }: { rows: [string, string][]; photo: File | null; receipt?: File | null; cv?: File | null }) {
   const [preview, setPreview] = useState<{ url: string; title: string } | null>(null);
 
   useEffect(() => {
@@ -236,6 +237,7 @@ export function ReviewLedger({ rows, photo, receipt }: { rows: [string, string][
       ))}
       <div className="review-ledger__photo"><span>Photo</span><PhotoThumb file={photo} onView={(url) => setPreview({ url, title: "Applicant photo" })} /></div>
       {receipt !== undefined && <div className="review-ledger__photo"><span>Receipt</span><PhotoThumb file={receipt} onView={(url) => setPreview({ url, title: "Payment receipt" })} /></div>}
+      {cv !== undefined && <div className="review-ledger__photo"><span>CV</span><DocumentThumb file={cv} onView={(url) => setPreview({ url, title: "CV" })} /></div>}
 
       {preview && createPortal(
         <div className="lightbox" role="dialog" aria-modal="true" aria-label={preview.title} onClick={() => setPreview(null)}>
@@ -265,6 +267,29 @@ function PhotoThumb({ file, onView }: { file: File | null; onView: (url: string)
         {/* eslint-disable-next-line @next/next/no-img-element -- blob preview URL */}
         <img src={url} alt="Selected image" />
       </button>
+    </strong>
+  );
+}
+
+// Like PhotoThumb, but the file may be a PDF: images still open the shared
+// lightbox, PDFs (which the <img>-based lightbox can't render) open in a new
+// tab via the browser's own PDF viewer instead.
+function DocumentThumb({ file, onView }: { file: File | null; onView: (url: string) => void }) {
+  if (!file) return <strong>Not selected</strong>;
+  const url = filePreviewUrl(file);
+  const isImage = file.type.startsWith("image/");
+  return (
+    <strong className="review-photo">
+      <Check aria-hidden="true" />
+      Attached
+      {isImage
+        ? <button type="button" className="review-photo__open" onClick={() => onView(url)} aria-label="View file full size">
+            {/* eslint-disable-next-line @next/next/no-img-element -- blob preview URL */}
+            <img src={url} alt="Selected file" />
+          </button>
+        : <a className="review-photo__open" href={url} target="_blank" rel="noreferrer" aria-label="Open PDF in a new tab">
+            <FileText size={37} aria-hidden="true" />
+          </a>}
     </strong>
   );
 }

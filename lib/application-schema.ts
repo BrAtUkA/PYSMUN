@@ -63,3 +63,25 @@ export const campusAmbassadorApplicationSchema = z.object({
 });
 
 export type CampusAmbassadorApplication = z.infer<typeof campusAmbassadorApplicationSchema>;
+
+export const directorateApplicationSchema = z.object({
+  fullName: z.string().trim().min(3, "Enter your full name").max(100),
+  cnic: z.string().trim().regex(cnicPattern, "Enter a valid CNIC in 12345-1234567-1 format"),
+  email: z.email("Enter a valid email address").max(160).transform((value) => value.toLowerCase()),
+  whatsapp: pakistaniMobile,
+  emergencyContact: pakistaniMobile,
+  institution: z.string().trim().min(2, "Enter your institution").max(160),
+  gradeSemester: z.string().trim().min(1, "Enter your grade or semester").max(60),
+  preferredDepartment: z.enum(["registrations", "logistics", "hospitality", "media", "decor", "security", "delegate-affairs"]),
+  preferredPosition: z.enum(["director", "assistant-director", "staff"]),
+  previousExperience: z.string().trim().min(3, "Let us know, even if it's none").max(700),
+  uniqueValue: z.string().trim().min(30, "Tell us a little more (at least 30 characters)").max(700),
+  instagramLink: z.string().trim().max(200),
+  availabilityCity: z.literal("yes", { error: "You must confirm you'll be available in Rahim Yar Khan during the event to apply for this role" }),
+  availabilityMeetings: z.literal("yes", { error: "You must confirm you can attend all meetings scheduled before the event to apply for this role" }),
+  consent: z.literal(true, { error: "Consent is required to submit" }),
+  website: z.string().max(0, "Submission rejected"),
+  turnstileToken: z.string().optional(),
+});
+
+export type DirectorateApplication = z.infer<typeof directorateApplicationSchema>;

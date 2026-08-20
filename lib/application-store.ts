@@ -4,10 +4,10 @@ import { createHash, randomInt } from "node:crypto";
 import { mkdir, appendFile, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { ApplicationPhoto } from "./application-photo";
-import type { CampusAmbassadorApplication, TrainingCampApplication } from "./application-schema";
+import type { CampusAmbassadorApplication, DirectorateApplication, TrainingCampApplication } from "./application-schema";
 
-type ApplicationProgram = "training-camp" | "campus-ambassador";
-type ApplicationPayload = TrainingCampApplication | CampusAmbassadorApplication;
+type ApplicationProgram = "training-camp" | "campus-ambassador" | "directorate";
+type ApplicationPayload = TrainingCampApplication | CampusAmbassadorApplication | DirectorateApplication;
 
 type StoredFile = {
   path: string;
@@ -24,21 +24,27 @@ type StoredApplication<T extends ApplicationPayload = ApplicationPayload> = {
   applicant: T;
   photo: StoredFile;
   receipt?: StoredFile;
+  cv?: StoredFile;
   paymentStatus?: string;
   paymentReference?: string;
 };
 
+const referenceCodePrefixes: Record<ApplicationProgram, string> = {
+  "training-camp": "TC",
+  "campus-ambassador": "CA",
+  directorate: "DR",
+};
+
 function referenceCode(program: ApplicationProgram) {
   const year = new Date().getFullYear().toString().slice(-2);
-  const prefix = program === "training-camp" ? "TC" : "CA";
-  return `${prefix}-${year}-${randomInt(1000, 9999)}`;
+  return `${referenceCodePrefixes[program]}-${year}-${randomInt(1000, 9999)}`;
 }
 
 function fingerprint(value: string) {
   return createHash("sha256").update(value.toLowerCase().trim()).digest("hex");
 }
 
-async function saveLocally<T extends ApplicationPayload>(application: T, program: ApplicationProgram, photo: ApplicationPhoto, receipt?: ApplicationPhoto): Promise<StoredApplication<T>> {
+async function saveLocally<T extends ApplicationPayload>(application: T, program: ApplicationProgram, photo: ApplicationPhoto, receipt?: ApplicationPhoto, cv?: ApplicationPhoto): Promise<StoredApplication<T>> {
   const dataDirectory = path.join(process.cwd(), ".data");
   const filePath = path.join(dataDirectory, "applications.ndjson");
   await mkdir(dataDirectory, { recursive: true });
@@ -76,6 +82,18 @@ async function saveLocally<T extends ApplicationPayload>(application: T, program
     };
   }
 
+  let storedCv: StoredFile | undefined;
+  if (cv) {
+    const cvDirectory = path.join(dataDirectory, "application-photos", "cv", program);
+    await mkdir(cvDirectory, { recursive: true });
+    await writeFile(path.join(cvDirectory, `${id}.${cv.extension}`), new Uint8Array(cv.data));
+    storedCv = {
+      path: path.posix.join("application-photos", "cv", program, `${id}.${cv.extension}`),
+      mimeType: cv.contentType,
+      size: cv.size,
+    };
+  }
+
   const record: StoredApplication<T> = {
     id,
     referenceCode: referenceCode(program),
@@ -85,6 +103,7 @@ async function saveLocally<T extends ApplicationPayload>(application: T, program
     applicant: application,
     photo: { path: relativePhotoPath, mimeType: photo.contentType, size: photo.size },
     receipt: storedReceipt,
+    cv: storedCv,
     paymentStatus: receipt ? "proof_submitted" : "pending",
     paymentReference: "transactionReference" in application ? String(application.transactionReference) : undefined,
   };
@@ -92,15 +111,16 @@ async function saveLocally<T extends ApplicationPayload>(application: T, program
   return record;
 }
 
-async function saveToSupabase<T extends ApplicationPayload>(application: T, program: ApplicationProgram, photo: ApplicationPhoto, receipt?: ApplicationPhoto): Promise<StoredApplication<T>> {
+async function saveToSupabase<T extends ApplicationPayload>(application: T, program: ApplicationProgram, photo: ApplicationPhoto, receipt?: ApplicationPhoto, cv?: ApplicationPhoto): Promise<StoredApplication<T>> {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return saveLocally(application, program, photo, receipt);
+  if (!url || !key) return saveLocally(application, program, photo, receipt, cv);
 
   const authHeaders = { apikey: key, authorization: `Bearer ${key}` };
   const id = crypto.randomUUID();
   const photoPath = `${program}/${id}.${photo.extension}`;
   const receiptPath = receipt ? `receipts/${program}/${id}.${receipt.extension}` : null;
+  const cvPath = cv ? `cv/${program}/${id}.${cv.extension}` : null;
 
   async function hasDuplicate(column: "applicant_email" | "applicant_cnic" | "applicant_phone", value: string) {
     const duplicateUrl = new URL(`${url}/rest/v1/applications`);
@@ -132,6 +152,7 @@ async function saveToSupabase<T extends ApplicationPayload>(application: T, prog
     applicant: application,
     photo: { path: photoPath, mimeType: photo.contentType, size: photo.size },
     receipt: receipt && receiptPath ? { path: receiptPath, mimeType: receipt.contentType, size: receipt.size } : undefined,
+    cv: cv && cvPath ? { path: cvPath, mimeType: cv.contentType, size: cv.size } : undefined,
     paymentStatus: receipt ? "proof_submitted" : "pending",
     paymentReference: "transactionReference" in application ? String(application.transactionReference) : undefined,
   };
@@ -153,14 +174,19 @@ async function saveToSupabase<T extends ApplicationPayload>(application: T, prog
     }).catch(() => undefined);
   }
 
-  const [photoUploaded, receiptUploaded] = await Promise.all([
+  const [photoUploaded, receiptUploaded, cvUploaded] = await Promise.all([
     uploadImage(photoPath, photo),
     receipt && receiptPath ? uploadImage(receiptPath, receipt) : Promise.resolve(true),
+    cv && cvPath ? uploadImage(cvPath, cv) : Promise.resolve(true),
   ]);
-  if (!photoUploaded || !receiptUploaded) {
-    // Clean up whichever half of the pair actually landed, so a partial
-    // failure never leaves an orphaned file behind.
-    const uploadedPaths = [photoUploaded ? photoPath : null, receiptUploaded && receiptPath ? receiptPath : null].filter((path): path is string => Boolean(path));
+  if (!photoUploaded || !receiptUploaded || !cvUploaded) {
+    // Clean up whichever files actually landed, so a partial failure never
+    // leaves an orphaned file behind.
+    const uploadedPaths = [
+      photoUploaded ? photoPath : null,
+      receiptUploaded && receiptPath ? receiptPath : null,
+      cvUploaded && cvPath ? cvPath : null,
+    ].filter((path): path is string => Boolean(path));
     await removeUploads(uploadedPaths);
     throw new Error("APPLICATION_PHOTO_STORE_FAILED");
   }
@@ -193,11 +219,15 @@ async function saveToSupabase<T extends ApplicationPayload>(application: T, prog
       receipt_mime_type: receipt?.contentType ?? null,
       receipt_size_bytes: receipt?.size ?? null,
       payment_updated_at: receipt ? record.submittedAt : null,
+      cv_path: cvPath,
+      cv_mime_type: cv?.contentType ?? null,
+      cv_size_bytes: cv?.size ?? null,
     }),
   });
 
   if (!response.ok) {
-    await removeUploads(receiptPath ? [photoPath, receiptPath] : [photoPath]);
+    const cleanupPaths = [photoPath, receiptPath, cvPath].filter((value): value is string => Boolean(value));
+    await removeUploads(cleanupPaths);
     if (response.status === 409) throw new Error("DUPLICATE_APPLICATION");
     throw new Error("APPLICATION_STORE_FAILED");
   }
@@ -284,6 +314,19 @@ export async function saveCampusAmbassadorApplication(application: CampusAmbassa
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ event: "campus_ambassador_application.received", referenceCode: record.referenceCode }),
+    }).catch(() => undefined);
+  }
+  return { referenceCode: record.referenceCode };
+}
+
+export async function saveDirectorateApplication(application: DirectorateApplication, photo: ApplicationPhoto, cv: ApplicationPhoto) {
+  const record = await saveToSupabase(application, "directorate", photo, undefined, cv);
+  const webhook = process.env.APPLICATION_NOTIFICATION_WEBHOOK_URL;
+  if (webhook) {
+    fetch(webhook, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ event: "directorate_application.received", referenceCode: record.referenceCode }),
     }).catch(() => undefined);
   }
   return { referenceCode: record.referenceCode };

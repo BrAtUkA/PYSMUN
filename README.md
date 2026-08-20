@@ -26,12 +26,12 @@
 
 ## Overview
 
-A complete, launch-ready platform for a national youth MUN: an editorial marketing site, two live application programs with payment collection, applicant status tracking, and a full review console for organizers.
+A complete, launch-ready platform for a national youth MUN: an editorial marketing site, three application programs (one with payment collection), applicant status tracking, and a full review console for organizers.
 
 | Surface | What it does |
 |---|---|
 | Marketing site | Home, About, Executive Council, Committees, PYS Bootcamp, FAQ, Contact, Terms, Privacy |
-| Applications | Multi-step "dossier" forms for the PYS Bootcamp (paid) and Campus Ambassador (free) programs |
+| Applications | Multi-step "dossier" forms for PYS Bootcamp (paid), Campus Ambassador (free), and Directorate (free) |
 | Status tracking | Applicants look up their Application ID and see a live review/payment timeline |
 | Admin console | Supabase-Auth-gated review dashboard: search, filters, staged saves, CSV export, duplicate detection |
 
@@ -73,7 +73,7 @@ npm run build
 
 ## Architecture notes
 
-**Application storage.** Applications post to `/api/applications/pys-bootcamp` and `/api/applications/campus-ambassador`; status lookups use `/api/applications/status`. With `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` set, the server writes through a service-role REST integration (never exposed to the browser). Apply the SQL files in `supabase/migrations/` in order before enabling persistence.
+**Application storage.** Applications post to `/api/applications/pys-bootcamp`, `/api/applications/campus-ambassador`, and `/api/applications/directorate`; status lookups use `/api/applications/status`. With `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` set, the server writes through a service-role REST integration (never exposed to the browser). Apply the SQL files in `supabase/migrations/` in order before enabling persistence.
 
 **Bot protection.** Set both `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` to enable Turnstile. Server-side verification is enforced whenever the secret is configured.
 
@@ -83,7 +83,7 @@ npm run build
 app/            Routes, API handlers, metadata, sitemap, robots
 components/     Form kit, admin console, 3D letter fields, site chrome
 lib/            Content source of truth, Zod schemas, storage, validation
-supabase/       Numbered SQL migrations (001-007)
+supabase/       Numbered SQL migrations (001-008)
 public/         Static assets
 ```
 

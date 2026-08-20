@@ -4,6 +4,10 @@ const nextConfig: NextConfig = {
   output: "standalone",
   reactStrictMode: true,
   poweredByHeader: false,
+  // Dev-server only (no effect in production): lets the dev origin's HMR/RSC
+  // requests through when the browser reaches this machine by an address
+  // other than exactly "localhost".
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
   async headers() {
     return [
       {

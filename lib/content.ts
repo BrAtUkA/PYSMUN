@@ -54,8 +54,9 @@ export const opportunities = [
     title: "Directorate",
     description: "Help shape the conference from the inside and build an experience delegates will remember.",
     href: "/applications/directorate",
-    status: "coming-soon" as ApplicationStatus,
+    status: "open" as ApplicationStatus,
     number: "03",
+    fee: "Free",
   },
   {
     id: "delegate",
@@ -117,6 +118,6 @@ export const faqs = [
   },
   {
     question: "Are Directorate and Delegate applications open?",
-    answer: `Not yet. There are no open applications right now. ${formatTitleList(upcomingOpportunities)} opportunities will follow.`,
+    answer: `Directorate applications are open now. ${formatTitleList(upcomingOpportunities)} opportunities will follow.`,
   },
 ];

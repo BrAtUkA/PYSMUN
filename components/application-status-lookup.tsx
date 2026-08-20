@@ -8,7 +8,7 @@ import { timeAgo } from "@/lib/time";
 
 type StatusResult = {
   referenceCode: string;
-  program: "training-camp" | "campus-ambassador";
+  program: "training-camp" | "campus-ambassador" | "directorate";
   fullName: string;
   submittedAt: string;
   reviewStatus: string;
@@ -24,6 +24,7 @@ type Stage = {
 const programNames: Record<StatusResult["program"], string> = {
   "training-camp": "PYS Bootcamp",
   "campus-ambassador": "Campus Ambassador",
+  directorate: "Directorate",
 };
 
 function buildStages(result: StatusResult): Stage[] {
@@ -90,7 +91,7 @@ export function ApplicationStatusLookup() {
 
   const lookup = async (event: FormEvent) => {
     event.preventDefault();
-    if (!/^(TC|CA)-\d{2}-\d{4}$/.test(referenceCode)) {
+    if (!/^(TC|CA|DR)-\d{2}-\d{4}$/.test(referenceCode)) {
       setMessage("Enter your Application ID, e.g. TC‑26‑1234.");
       return;
     }
