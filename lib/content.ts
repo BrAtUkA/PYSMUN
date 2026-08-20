@@ -56,7 +56,8 @@ export const opportunities = [
     href: "/applications/directorate",
     status: "open" as ApplicationStatus,
     number: "03",
-    fee: "Free",
+    // Deliberately no fee field: Directorate says nothing about payment,
+    // because selected candidates may be asked to contribute after interview.
   },
   {
     id: "delegate",

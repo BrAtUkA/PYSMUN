@@ -228,12 +228,12 @@ export function DirectorateForm() {
 
   if (status === "success") {
     return <FormSuccess
-      title={<>You&rsquo;re on the<br /><em>shortlist.</em></>}
+      title={<>You&rsquo;re in<br /><em>the running.</em></>}
       note="Your Directorate application is with the PYSMUN team."
       reference={reference}
       steps={[
         "Your application is reviewed within 24 hours",
-        "Shortlisted candidates may be invited to an interview",
+        "Shortlisted candidates are invited to a short interview",
         "Selected directors and staff are confirmed by email and WhatsApp",
       ]}
     />;

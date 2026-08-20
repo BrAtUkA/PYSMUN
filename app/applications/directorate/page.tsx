@@ -17,7 +17,7 @@ export default function DirectorateApplicationPage() {
         eyebrow="Leadership team"
         title="Directorate"
         description="Help design, coordinate and deliver the PYSMUN experience from inside the organization."
-        items={["Select the roles that best fit your skills and availability.", "Show relevant leadership, event or Model UN experience.", "Explain how you would contribute to a professional delegate experience.", "Shortlisted candidates may be invited to an interview."]}
+        items={["Select the roles that best fit your skills and availability.", "Show relevant leadership, event or Model UN experience.", "Explain how you would contribute to a professional delegate experience.", "Shortlisted candidates are invited to a short interview."]}
       />
     );
   }
@@ -28,7 +28,7 @@ export default function DirectorateApplicationPage() {
         <div>
           <p className="eyebrow">Leadership team</p>
           <h1>Run the room<br /><em>from the inside.</em></h1>
-          <p>Directors, assistant directors and staff design, coordinate and deliver the PYSMUN experience.</p>
+          <p>Directors, assistant directors and staff design, coordinate and deliver the PYSMUN experience. Shortlisted applicants are invited to a short interview.</p>
         </div>
         <div className="form-aside__foot">
           <span className="status-pill" data-status="open">Applications open</span>

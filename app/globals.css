@@ -843,7 +843,7 @@ img, svg, canvas { display: block; max-width: 100%; }
 .admin-chip { width: max-content; padding: .3rem .6rem; border-radius: 999px; background: rgba(9,17,30,.07); color: #4e5b6b; font-size: .62rem; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; }
 .admin-chip[data-status="accepted"], .admin-chip[data-payment="confirmed"] { background: rgba(42,197,141,.15); color: #16845f; }
 .admin-chip[data-status="rejected"], .admin-chip[data-payment="invalid"] { background: rgba(163,62,62,.12); color: #a33e3e; }
-.admin-chip[data-status="under_review"], .admin-chip[data-payment="proof_submitted"] { background: rgba(216,200,138,.3); color: #7a6640; }
+.admin-chip[data-status="under_review"], .admin-chip[data-status="interview"], .admin-chip[data-payment="proof_submitted"] { background: rgba(216,200,138,.3); color: #7a6640; }
 .admin-row__detail { padding: 1.2rem 1rem; display: grid; grid-template-columns: 11rem minmax(0,1fr) 16rem; gap: 1.6rem; align-items: start; border-top: 1px solid var(--line-light); }
 .admin-row__detail[data-narrow] { grid-template-columns: 11rem minmax(0,1fr); }
 .admin-detail__portrait { margin: 0; }

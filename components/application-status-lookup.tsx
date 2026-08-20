@@ -58,15 +58,25 @@ function buildStages(result: StatusResult): Stage[] {
     return stages;
   }
 
+  // Directorate runs an interview between review and the final decision, so
+  // that stage is shown on its timeline from the start.
+  const usesInterview = result.program === "directorate";
+
   const stages: Stage[] = [
     { label: "Application received", description: `Thanks${greeting}. Your application is safely in our records.`, state: "done" },
   ];
 
   if (review === "received" || review === "under_review") {
     stages.push({ label: "Under review", description: "The team reviews applications within 24 hours.", state: "current" });
+    if (usesInterview) stages.push({ label: "Interview", description: "Shortlisted applicants are invited to a short interview.", state: "upcoming" });
     stages.push({ label: "Decision", description: "Posted here the moment it is made, check back anytime. We will also reach out on provided contact details.", state: "upcoming" });
+  } else if (review === "interview") {
+    stages.push({ label: "Under review", description: "Review complete.", state: "done" });
+    stages.push({ label: "Interview", description: `You have been shortlisted${greeting}. The team will contact you on your email and WhatsApp to arrange a short interview.`, state: "current" });
+    stages.push({ label: "Decision", description: "Posted here once your interview is complete.", state: "upcoming" });
   } else if (review === "accepted") {
     stages.push({ label: "Under review", description: "Review complete.", state: "done" });
+    if (usesInterview) stages.push({ label: "Interview", description: "Interview stage complete.", state: "done" });
     stages.push({ label: "Selected", description: `Congratulations${greeting}! Check your email and WhatsApp for onboarding details.`, state: "done" });
   } else if (review === "waitlisted") {
     stages.push({ label: "Under review", description: "Review complete.", state: "done" });

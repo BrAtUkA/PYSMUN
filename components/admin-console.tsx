@@ -30,12 +30,13 @@ const programNames: Record<ApplicationRow["program_slug"], string> = {
   directorate: "Directorate",
 };
 
-const reviewStatuses = ["received", "under_review", "accepted", "waitlisted", "rejected"] as const;
+const reviewStatuses = ["received", "under_review", "interview", "accepted", "waitlisted", "rejected"] as const;
 const paymentStatuses = ["proof_submitted", "confirmed", "invalid"] as const;
 
 const statusLabels: Record<string, string> = {
   received: "Received",
   under_review: "Under review",
+  interview: "Interview",
   accepted: "Accepted",
   waitlisted: "Waitlisted",
   rejected: "Rejected",
@@ -240,7 +241,7 @@ function exportFileName(count: number, context: ExportContext) {
   const programSlugs: Record<string, string> = { "training-camp": "bootcamp", "campus-ambassador": "campus", directorate: "directorate" };
   if (context.programFilter !== "all") parts.push(programSlugs[context.programFilter] ?? context.programFilter);
   if (context.statusFilter !== "all") parts.push(slug(statusLabels[context.statusFilter] ?? context.statusFilter));
-  if (context.paymentFilter !== "all") parts.push(context.paymentFilter === "free" ? "free" : slug(statusLabels[context.paymentFilter] ?? context.paymentFilter));
+  if (context.paymentFilter !== "all") parts.push(slug(statusLabels[context.paymentFilter] ?? context.paymentFilter));
   if (context.facet) parts.push(slug(context.facet).slice(0, 24));
   if (context.day) parts.push(context.day);
   const searchSlug = slug(context.search).slice(0, 24);
@@ -268,7 +269,7 @@ function exportRowsAsCsv(rows: ApplicationRow[], context: ExportContext) {
       programNames[row.program_slug],
       row.submitted_at,
       row.review_status,
-      row.program_slug === "training-camp" ? row.payment_status : "free",
+      row.program_slug === "training-camp" ? row.payment_status : "",
       row.payment_reference ?? "",
       row.applicant_email,
       row.applicant_phone,
@@ -438,6 +439,7 @@ export function AdminConsole() {
     needsReview: rows.filter(needsReview).length,
     received: rows.filter((row) => row.review_status === "received").length,
     underReview: rows.filter((row) => row.review_status === "under_review").length,
+    interview: rows.filter((row) => row.review_status === "interview").length,
     accepted: rows.filter((row) => row.review_status === "accepted").length,
     waitlisted: rows.filter((row) => row.review_status === "waitlisted").length,
     rejected: rows.filter((row) => row.review_status === "rejected").length,
@@ -625,6 +627,9 @@ export function AdminConsole() {
         <button data-active={statusFilter === "needs-review" || undefined} onClick={() => toggleStatus("needs-review")}>
           <strong data-tone="gold">{stats.needsReview}</strong><span>Needs review</span>
         </button>
+        <button data-active={statusFilter === "interview" || undefined} onClick={() => toggleStatus("interview")}>
+          <strong data-tone="gold">{stats.interview}</strong><span>Interview</span>
+        </button>
         <button data-active={statusFilter === "accepted" || undefined} onClick={() => toggleStatus("accepted")}>
           <strong data-tone="green">{stats.accepted}</strong><span>Accepted</span>
         </button>
@@ -808,9 +813,11 @@ export function AdminConsole() {
                 <span>{programNames[row.program_slug]}</span>
                 <span className="admin-row__chips">
                   <span className="admin-chip" data-status={row.review_status}>{statusLabels[row.review_status] ?? row.review_status}</span>
-                  {row.program_slug === "training-camp"
-                    ? <span className="admin-chip" data-payment={row.payment_status}>{statusLabels[row.payment_status] ?? row.payment_status}</span>
-                    : <span className="admin-chip" data-payment="free">Free</span>}
+                  {/* Only the Bootcamp collects payment; other programs show no
+                      payment chip at all rather than claiming to be free. */}
+                  {row.program_slug === "training-camp" && (
+                    <span className="admin-chip" data-payment={row.payment_status}>{statusLabels[row.payment_status] ?? row.payment_status}</span>
+                  )}
                 </span>
               </button>
 
