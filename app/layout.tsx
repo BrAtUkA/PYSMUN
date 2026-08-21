@@ -5,13 +5,15 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { CursorAura } from "@/components/cursor-aura";
 import { TapFeedback } from "@/components/tap-feedback";
-import { bootcampFacts, siteConfig } from "@/lib/content";
+import { bootcampFacts, formatTitleList, openOpportunities, siteConfig } from "@/lib/content";
 import "@fontsource-variable/dm-sans/index.css";
 import "@fontsource/instrument-serif/400.css";
 import "@fontsource/instrument-serif/400-italic.css";
 import "./globals.css";
 
-const socialDescription = `Explore the PYS Bootcamp, held ${bootcampFacts.dates} in ${bootcampFacts.city}. Applications for this intake are closed. Step into the room where ideas become resolutions.`;
+const socialDescription = openOpportunities.length > 0
+  ? `${formatTitleList(openOpportunities)} applications are open at Pakistan Youth Summit Model United Nations. Step into the room where ideas become resolutions.`
+  : `Explore the PYS Bootcamp, held ${bootcampFacts.dates} in ${bootcampFacts.city}. Applications for this intake are closed. Step into the room where ideas become resolutions.`;
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://pysmun.com"),

@@ -8,6 +8,9 @@ import styles from "./page.module.css";
 
 export default function Home() {
   const applicationsOpen = openOpportunities.length > 0;
+  // With exactly one intake open the hero points straight at it; with several
+  // it falls back to the hub rather than picking a favourite.
+  const featured = openOpportunities.length === 1 ? openOpportunities[0] : null;
 
   return (
     <main id="main-content">
@@ -26,9 +29,9 @@ export default function Home() {
             </div>
           </div>
           <div className={styles.heroActions}>
-            <Link className={styles.heroPrimaryCta} href="/pys-bootcamp">
-              <span className={styles.heroCtaMeta}>Current application intake closed</span>
-              <strong>Explore the PYS Bootcamp</strong>
+            <Link className={styles.heroPrimaryCta} href={applicationsOpen ? (featured?.href ?? "/applications") : "/pys-bootcamp"}>
+              <span className={styles.heroCtaMeta}>{applicationsOpen ? "Applications open" : "Current application intake closed"}</span>
+              <strong>{applicationsOpen ? (featured ? `Apply for ${featured.title}` : "See open applications") : "Explore the PYS Bootcamp"}</strong>
               <span className={styles.heroCtaIcon}><ArrowUpRight size={18} /></span>
             </Link>
             <Link className={styles.heroDiscover} href="#discover">

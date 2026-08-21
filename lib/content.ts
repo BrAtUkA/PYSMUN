@@ -111,7 +111,9 @@ export const faqs = [
   },
   {
     question: "When do applications close?",
-    answer: `PYS Bootcamp applications closed on ${bootcampFacts.deadline}. Campus Ambassador applications are also closed. No further applications are being accepted for either current intake.`,
+    answer: openOpportunities.length > 0
+      ? `${formatTitleList(openOpportunities)} applications are open now, and a closing date has not been announced yet. The PYS Bootcamp and Campus Ambassador intakes are closed.`
+      : `PYS Bootcamp applications closed on ${bootcampFacts.deadline}. Campus Ambassador applications are also closed. No further applications are being accepted for either current intake.`,
   },
   {
     question: "What will I learn at the PYS Bootcamp?",
@@ -119,6 +121,6 @@ export const faqs = [
   },
   {
     question: "Are Directorate and Delegate applications open?",
-    answer: `Directorate applications are open now. ${formatTitleList(upcomingOpportunities)} opportunities will follow.`,
+    answer: `${openOpportunities.length > 0 ? `${formatTitleList(openOpportunities)} applications are open now.` : "Not yet."}${upcomingOpportunities.length > 0 ? ` Applications for ${formatTitleList(upcomingOpportunities)} will follow.` : ""}`,
   },
 ];
