@@ -54,7 +54,7 @@ export const opportunities = [
     title: "Directorate",
     description: "Help shape the conference from the inside and build an experience delegates will remember.",
     href: "/applications/directorate",
-    status: "open" as ApplicationStatus,
+    status: "closed" as ApplicationStatus,
     number: "03",
     // Deliberately no fee field: Directorate says nothing about payment,
     // because selected candidates may be asked to contribute after interview.
@@ -112,8 +112,8 @@ export const faqs = [
   {
     question: "When do applications close?",
     answer: openOpportunities.length > 0
-      ? `${formatTitleList(openOpportunities)} applications are open now, and a closing date has not been announced yet. The PYS Bootcamp and Campus Ambassador intakes are closed.`
-      : `PYS Bootcamp applications closed on ${bootcampFacts.deadline}. Campus Ambassador applications are also closed. No further applications are being accepted for either current intake.`,
+      ? `${formatTitleList(openOpportunities)} applications are open now, and a closing date has not been announced yet. The PYS Bootcamp, Campus Ambassador and Directorate intakes are closed.`
+      : `PYS Bootcamp applications closed on ${bootcampFacts.deadline}. Campus Ambassador and Directorate applications are also closed. No further applications are currently being accepted.`,
   },
   {
     question: "What will I learn at the PYS Bootcamp?",
@@ -121,6 +121,6 @@ export const faqs = [
   },
   {
     question: "Are Directorate and Delegate applications open?",
-    answer: `${openOpportunities.length > 0 ? `${formatTitleList(openOpportunities)} applications are open now.` : "Not yet."}${upcomingOpportunities.length > 0 ? ` Applications for ${formatTitleList(upcomingOpportunities)} will follow.` : ""}`,
+    answer: `Directorate applications have closed for this cycle.${upcomingOpportunities.length > 0 ? ` Applications for ${formatTitleList(upcomingOpportunities)} will follow.` : ""}`,
   },
 ];

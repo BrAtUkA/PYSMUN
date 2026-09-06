@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: "Applications",
   description: openOpportunities.length > 0
     ? `${formatTitleList(openOpportunities)} applications are open at PYSMUN.${upcomingOpportunities.length > 0 ? ` Applications for ${formatTitleList(upcomingOpportunities)} will follow.` : ""}`
-    : "PYS Bootcamp and Campus Ambassador applications are closed. Directorate and Delegate opportunities will follow.",
+    : "PYS Bootcamp, Campus Ambassador and Directorate applications are closed. Delegate opportunities will follow.",
 };
 
 const applicationOrder = ["pys-bootcamp", "campus-ambassador", "directorate", "delegate"];
@@ -29,7 +29,7 @@ export default function ApplicationsPage() {
               <h1>See what comes <em>next.</em></h1>
             </div>
             <div className="applications-overview__meta">
-              <p>{applicationsOpen ? `${formatTitleList(openOpportunities)} applications are now open.` : "PYS Bootcamp and Campus Ambassador applications are closed."}{upcomingOpportunities.length > 0 && ` Applications for ${formatTitleList(upcomingOpportunities)} will follow.`}</p>
+              <p>{applicationsOpen ? `${formatTitleList(openOpportunities)} applications are now open.` : "PYS Bootcamp, Campus Ambassador and Directorate applications are closed."}{upcomingOpportunities.length > 0 && ` Applications for ${formatTitleList(upcomingOpportunities)} will follow.`}</p>
               <span className="status-pill" data-status={applicationsOpen ? "open" : "closed"}>{applicationsOpen ? `${countWords[openOpportunities.length]} application${openOpportunities.length === 1 ? "" : "s"} live` : "No applications currently open"}</span>
             </div>
           </header>

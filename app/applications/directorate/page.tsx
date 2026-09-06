@@ -4,8 +4,8 @@ import { DirectorateForm } from "@/components/directorate-form";
 import { opportunities } from "@/lib/content";
 
 export const metadata: Metadata = {
-  title: "Directorate Application",
-  description: "Apply for the PYSMUN Directorate — help design, coordinate and deliver the conference experience from inside the organization.",
+  title: "Directorate Applications Closed",
+  description: "Directorate applications for the current PYSMUN intake are closed.",
 };
 
 export default function DirectorateApplicationPage() {
@@ -17,6 +17,8 @@ export default function DirectorateApplicationPage() {
         eyebrow="Leadership team"
         title="Directorate"
         description="Help design, coordinate and deliver the PYSMUN experience from inside the organization."
+        status="closed"
+        notice="Applications for the current Directorate intake are closed. Future opportunities will be announced through official PYSMUN channels."
         items={["Select the roles that best fit your skills and availability.", "Show relevant leadership, event or Model UN experience.", "Explain how you would contribute to a professional delegate experience.", "Shortlisted candidates are invited to a short interview."]}
       />
     );
