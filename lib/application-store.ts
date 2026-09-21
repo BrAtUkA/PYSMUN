@@ -4,10 +4,13 @@ import { createHash, randomInt } from "node:crypto";
 import { mkdir, appendFile, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { ApplicationPhoto } from "./application-photo";
-import type { CampusAmbassadorApplication, DirectorateApplication, TrainingCampApplication } from "./application-schema";
+import type { CampusAmbassadorApplication, DelegateApplication, DirectorateApplication, TrainingCampApplication } from "./application-schema";
+import type { DelegateFeeTier } from "./content";
 
-type ApplicationProgram = "training-camp" | "campus-ambassador" | "directorate";
-type ApplicationPayload = TrainingCampApplication | CampusAmbassadorApplication | DirectorateApplication;
+export type DelegateApplicationRecord = DelegateApplication & { feeTier: DelegateFeeTier; feeAmount: string };
+
+type ApplicationProgram = "training-camp" | "campus-ambassador" | "directorate" | "delegate";
+type ApplicationPayload = TrainingCampApplication | CampusAmbassadorApplication | DirectorateApplication | DelegateApplicationRecord;
 
 type StoredFile = {
   path: string;
@@ -25,6 +28,7 @@ type StoredApplication<T extends ApplicationPayload = ApplicationPayload> = {
   photo: StoredFile;
   receipt?: StoredFile;
   cv?: StoredFile;
+  idDocument?: StoredFile;
   paymentStatus?: string;
   paymentReference?: string;
 };
@@ -33,6 +37,7 @@ const referenceCodePrefixes: Record<ApplicationProgram, string> = {
   "training-camp": "TC",
   "campus-ambassador": "CA",
   directorate: "DR",
+  delegate: "DL",
 };
 
 function referenceCode(program: ApplicationProgram) {
@@ -44,7 +49,7 @@ function fingerprint(value: string) {
   return createHash("sha256").update(value.toLowerCase().trim()).digest("hex");
 }
 
-async function saveLocally<T extends ApplicationPayload>(application: T, program: ApplicationProgram, photo: ApplicationPhoto, receipt?: ApplicationPhoto, cv?: ApplicationPhoto): Promise<StoredApplication<T>> {
+async function saveLocally<T extends ApplicationPayload>(application: T, program: ApplicationProgram, photo: ApplicationPhoto, receipt?: ApplicationPhoto, cv?: ApplicationPhoto, idDocument?: ApplicationPhoto): Promise<StoredApplication<T>> {
   const dataDirectory = path.join(process.cwd(), ".data");
   const filePath = path.join(dataDirectory, "applications.ndjson");
   await mkdir(dataDirectory, { recursive: true });
@@ -94,6 +99,18 @@ async function saveLocally<T extends ApplicationPayload>(application: T, program
     };
   }
 
+  let storedIdDocument: StoredFile | undefined;
+  if (idDocument) {
+    const idDocumentDirectory = path.join(dataDirectory, "application-photos", "id-document", program);
+    await mkdir(idDocumentDirectory, { recursive: true });
+    await writeFile(path.join(idDocumentDirectory, `${id}.${idDocument.extension}`), new Uint8Array(idDocument.data));
+    storedIdDocument = {
+      path: path.posix.join("application-photos", "id-document", program, `${id}.${idDocument.extension}`),
+      mimeType: idDocument.contentType,
+      size: idDocument.size,
+    };
+  }
+
   const record: StoredApplication<T> = {
     id,
     referenceCode: referenceCode(program),
@@ -104,6 +121,7 @@ async function saveLocally<T extends ApplicationPayload>(application: T, program
     photo: { path: relativePhotoPath, mimeType: photo.contentType, size: photo.size },
     receipt: storedReceipt,
     cv: storedCv,
+    idDocument: storedIdDocument,
     paymentStatus: receipt ? "proof_submitted" : "pending",
     paymentReference: "transactionReference" in application ? String(application.transactionReference) : undefined,
   };
@@ -111,16 +129,17 @@ async function saveLocally<T extends ApplicationPayload>(application: T, program
   return record;
 }
 
-async function saveToSupabase<T extends ApplicationPayload>(application: T, program: ApplicationProgram, photo: ApplicationPhoto, receipt?: ApplicationPhoto, cv?: ApplicationPhoto): Promise<StoredApplication<T>> {
+async function saveToSupabase<T extends ApplicationPayload>(application: T, program: ApplicationProgram, photo: ApplicationPhoto, receipt?: ApplicationPhoto, cv?: ApplicationPhoto, idDocument?: ApplicationPhoto): Promise<StoredApplication<T>> {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return saveLocally(application, program, photo, receipt, cv);
+  if (!url || !key) return saveLocally(application, program, photo, receipt, cv, idDocument);
 
   const authHeaders = { apikey: key, authorization: `Bearer ${key}` };
   const id = crypto.randomUUID();
   const photoPath = `${program}/${id}.${photo.extension}`;
   const receiptPath = receipt ? `receipts/${program}/${id}.${receipt.extension}` : null;
   const cvPath = cv ? `cv/${program}/${id}.${cv.extension}` : null;
+  const idDocumentPath = idDocument ? `id-document/${program}/${id}.${idDocument.extension}` : null;
 
   async function hasDuplicate(column: "applicant_email" | "applicant_cnic" | "applicant_phone", value: string) {
     const duplicateUrl = new URL(`${url}/rest/v1/applications`);
@@ -153,6 +172,7 @@ async function saveToSupabase<T extends ApplicationPayload>(application: T, prog
     photo: { path: photoPath, mimeType: photo.contentType, size: photo.size },
     receipt: receipt && receiptPath ? { path: receiptPath, mimeType: receipt.contentType, size: receipt.size } : undefined,
     cv: cv && cvPath ? { path: cvPath, mimeType: cv.contentType, size: cv.size } : undefined,
+    idDocument: idDocument && idDocumentPath ? { path: idDocumentPath, mimeType: idDocument.contentType, size: idDocument.size } : undefined,
     paymentStatus: receipt ? "proof_submitted" : "pending",
     paymentReference: "transactionReference" in application ? String(application.transactionReference) : undefined,
   };
@@ -174,18 +194,20 @@ async function saveToSupabase<T extends ApplicationPayload>(application: T, prog
     }).catch(() => undefined);
   }
 
-  const [photoUploaded, receiptUploaded, cvUploaded] = await Promise.all([
+  const [photoUploaded, receiptUploaded, cvUploaded, idDocumentUploaded] = await Promise.all([
     uploadImage(photoPath, photo),
     receipt && receiptPath ? uploadImage(receiptPath, receipt) : Promise.resolve(true),
     cv && cvPath ? uploadImage(cvPath, cv) : Promise.resolve(true),
+    idDocument && idDocumentPath ? uploadImage(idDocumentPath, idDocument) : Promise.resolve(true),
   ]);
-  if (!photoUploaded || !receiptUploaded || !cvUploaded) {
+  if (!photoUploaded || !receiptUploaded || !cvUploaded || !idDocumentUploaded) {
     // Clean up whichever files actually landed, so a partial failure never
     // leaves an orphaned file behind.
     const uploadedPaths = [
       photoUploaded ? photoPath : null,
       receiptUploaded && receiptPath ? receiptPath : null,
       cvUploaded && cvPath ? cvPath : null,
+      idDocumentUploaded && idDocumentPath ? idDocumentPath : null,
     ].filter((path): path is string => Boolean(path));
     await removeUploads(uploadedPaths);
     throw new Error("APPLICATION_PHOTO_STORE_FAILED");
@@ -222,11 +244,14 @@ async function saveToSupabase<T extends ApplicationPayload>(application: T, prog
       cv_path: cvPath,
       cv_mime_type: cv?.contentType ?? null,
       cv_size_bytes: cv?.size ?? null,
+      id_document_path: idDocumentPath,
+      id_document_mime_type: idDocument?.contentType ?? null,
+      id_document_size_bytes: idDocument?.size ?? null,
     }),
   });
 
   if (!response.ok) {
-    const cleanupPaths = [photoPath, receiptPath, cvPath].filter((value): value is string => Boolean(value));
+    const cleanupPaths = [photoPath, receiptPath, cvPath, idDocumentPath].filter((value): value is string => Boolean(value));
     await removeUploads(cleanupPaths);
     if (response.status === 409) throw new Error("DUPLICATE_APPLICATION");
     throw new Error("APPLICATION_STORE_FAILED");
@@ -327,6 +352,19 @@ export async function saveDirectorateApplication(application: DirectorateApplica
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ event: "directorate_application.received", referenceCode: record.referenceCode }),
+    }).catch(() => undefined);
+  }
+  return { referenceCode: record.referenceCode };
+}
+
+export async function saveDelegateApplication(application: DelegateApplicationRecord, photo: ApplicationPhoto, idDocument: ApplicationPhoto, receipt: ApplicationPhoto) {
+  const record = await saveToSupabase(application, "delegate", photo, receipt, undefined, idDocument);
+  const webhook = process.env.APPLICATION_NOTIFICATION_WEBHOOK_URL;
+  if (webhook) {
+    fetch(webhook, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ event: "delegate_application.received", referenceCode: record.referenceCode }),
     }).catch(() => undefined);
   }
   return { referenceCode: record.referenceCode };

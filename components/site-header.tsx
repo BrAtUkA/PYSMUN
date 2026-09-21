@@ -33,7 +33,7 @@ export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [footerVisible, setFooterVisible] = useState(false);
   const needsRestingSurface = pathname !== "/";
-  const usesSplitFormHeader = pathname === "/applications/pys-bootcamp" || pathname === "/applications/campus-ambassador" || pathname === "/applications/directorate";
+  const usesSplitFormHeader = pathname === "/applications/pys-bootcamp" || pathname === "/applications/campus-ambassador" || pathname === "/applications/directorate" || pathname === "/applications/delegate";
   const isApplicationsHub = pathname === "/applications";
   const primaryAction = usesSplitFormHeader
     ? pathname === "/applications/pys-bootcamp"

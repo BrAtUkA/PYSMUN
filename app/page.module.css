@@ -131,6 +131,7 @@
 .committeeEntry:nth-child(odd) { border-right: 1px solid var(--line-dark); }
 .committeeEntry::before { content: ""; position: absolute; z-index: -1; inset: 0; background: var(--ivory); transform: scaleY(0); transform-origin: bottom; transition: transform .68s cubic-bezier(.22,1,.36,1); }
 .committeeEntry > p { grid-column: 2; margin: 0; color: var(--gold); font-size: .59rem; letter-spacing: .1em; text-transform: uppercase; transition: color .4s ease; }
+.committeeMark { grid-column: 1; grid-row: 1; justify-self: start; }
 .committeeEntry > strong { grid-column: 1 / -1; align-self: center; margin: .7rem 0; color: var(--ivory); font-family: var(--serif); font-size: clamp(4rem,5.5vw,6.4rem); font-weight: 400; line-height: .82; letter-spacing: -.045em; transition: color .4s ease, transform .6s cubic-bezier(.22,1,.36,1); }
 .committeeEntry h3 { grid-column: 1 / -1; max-width: 34rem; margin: 0; color: var(--slate); font-size: .84rem; font-weight: 450; line-height: 1.35; transition: color .4s ease; }
 .committeeEntry:hover, .committeeEntry:global(.is-tapped) { padding-inline: 1.7rem 1rem; color: var(--ink); }

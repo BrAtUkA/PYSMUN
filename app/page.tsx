@@ -1,4 +1,5 @@
 import { AnimatedCounter } from "@/components/animated-counter";
+import { CommitteeBadge } from "@/components/committee-badge";
 import { HeroLetterField } from "@/components/hero-letter-field";
 import { Reveal } from "@/components/reveal";
 import { applicationStatusLabels, committees, countWords, openOpportunities, opportunities } from "@/lib/content";
@@ -182,16 +183,17 @@ export default function Home() {
           <Reveal className={styles.committeeHead}>
             <div>
               <p className="eyebrow">Committee index</p>
-              <h2>Eight rooms.<br /><em>Six revealed.</em></h2>
+              <h2>Five rooms.<br /><em>Four revealed.</em></h2>
             </div>
             <div className={styles.committeeIntro}>
               <span>Choose the question you want to carry.</span>
-              <p>Security, rights, health, policy, crisis and two fictional worlds still waiting to be revealed.</p>
+              <p>Policy, human rights, crisis response, gender equality and one fictional world still waiting to be revealed.</p>
             </div>
           </Reveal>
           <div className={styles.committeeIndex}>
             {committees.map((committee) => (
               <Reveal className={`${styles.committeeEntry}${committee.sealed ? ` ${styles.committeeEntrySealed}` : ""}`} tapFeedback key={committee.code}>
+                <CommitteeBadge committee={committee} className={`${styles.committeeMark} committee-badge--card`} />
                 <p>{committee.tone}</p>
                 <strong>{committee.code}</strong>
                 <h3>{committee.name}</h3>
@@ -200,7 +202,7 @@ export default function Home() {
           </div>
           <Reveal className={styles.committeeCta}>
             <Link className={styles.committeeCtaLink} href="/committees" data-tap-feedback>
-              <span>Explore all eight committees</span>
+              <span>Explore all five committees</span>
               <strong>Find your room.</strong>
               <i><ArrowUpRight size={24} /></i>
             </Link>

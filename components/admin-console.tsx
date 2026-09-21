@@ -3,13 +3,14 @@
 import type { Session } from "@supabase/supabase-js";
 import { ArrowRight, ArrowUpRight, Check, ChevronDown, ChevronUp, Copy, Download, FileText, LoaderCircle, LogOut, RefreshCw, TriangleAlert, X } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
+import { committees, paidPrograms } from "@/lib/content";
 import { getSupabaseBrowserClient, supabaseDashboardUrl } from "@/lib/supabase-browser";
 import { timeAgo } from "@/lib/time";
 
 type ApplicationRow = {
   id: string;
   reference_code: string;
-  program_slug: "training-camp" | "campus-ambassador" | "directorate";
+  program_slug: "training-camp" | "campus-ambassador" | "directorate" | "delegate";
   applicant_email: string;
   applicant_phone: string;
   applicant_cnic: string;
@@ -20,6 +21,8 @@ type ApplicationRow = {
   receipt_path: string | null;
   cv_path: string | null;
   cv_mime_type: string | null;
+  id_document_path: string | null;
+  id_document_mime_type: string | null;
   payload: Record<string, unknown>;
   submitted_at: string;
 };
@@ -28,7 +31,14 @@ const programNames: Record<ApplicationRow["program_slug"], string> = {
   "training-camp": "PYS Bootcamp",
   "campus-ambassador": "Campus Ambassador",
   directorate: "Directorate",
+  delegate: "Delegate",
 };
+
+const committeeNameByCode: Record<string, string> = Object.fromEntries(committees.map((committee) => [committee.code, committee.name]));
+
+function isPaidProgram(program: ApplicationRow["program_slug"]) {
+  return (paidPrograms as readonly string[]).includes(program);
+}
 
 const reviewStatuses = ["received", "under_review", "interview", "accepted", "waitlisted", "rejected"] as const;
 const paymentStatuses = ["proof_submitted", "confirmed", "invalid"] as const;
@@ -51,11 +61,15 @@ const statusLabels: Record<string, string> = {
 const fieldLabelOverrides: Record<string, string> = {
   age: "Age",
   alternatePhone: "Alternate phone",
+  ambassadorCode: "Ambassador code",
   availabilityCity: "Available in city",
   availabilityMeetings: "Attends meetings",
   campusRole: "Campus role",
+  countryPreference: "Country / personality preference",
   educationLevel: "Education",
   emergencyContact: "Emergency contact",
+  fieldOfStudy: "Field of study",
+  firstChoiceCommittee: "1st choice committee",
   gradeSemester: "Grade / semester",
   instagramLink: "Instagram",
   motivation: "Motivation",
@@ -65,6 +79,7 @@ const fieldLabelOverrides: Record<string, string> = {
   previousExperience: "Previous experience",
   referral: "Heard about us via",
   requirements: "Requirements",
+  secondChoiceCommittee: "2nd choice committee",
   socialProfile: "Social profile",
   uniqueValue: "Unique value",
 };
@@ -76,15 +91,16 @@ function fieldLabel(key: string) {
 // JSON key order is arbitrary, so detail fields are shown in a deliberate
 // reading order instead; anything unlisted falls to the end.
 const detailFieldOrder = [
-  "age", "city", "institution", "educationLevel", "gradeSemester", "campusRole", "experience",
+  "age", "gender", "city", "institution", "fieldOfStudy", "educationLevel", "gradeSemester", "campusRole", "experience",
   "preferredDepartment", "preferredPosition", "availabilityCity", "availabilityMeetings",
-  "emergencyContact", "alternatePhone", "socialProfile", "instagramLink", "referral",
+  "firstChoiceCommittee", "secondChoiceCommittee", "countryPreference",
+  "emergencyContact", "alternatePhone", "socialProfile", "instagramLink", "referral", "ambassadorCode",
 ];
 
 
 const csvSkippedPayloadKeys = ["email", "whatsapp", "cnic", "consent", "website", "turnstileToken", "transactionReference"];
 
-const detailSkippedKeys = ["fullName", "email", "whatsapp", "cnic", "consent", "website", "turnstileToken", "transactionReference"];
+const detailSkippedKeys = ["fullName", "email", "whatsapp", "cnic", "consent", "website", "turnstileToken", "transactionReference", "feeTier", "feeAmount"];
 const longTextKeys = ["motivation", "outreachPlan", "requirements", "previousExperience", "uniqueValue"];
 
 const payloadValueLabels: Record<string, string> = {
@@ -112,6 +128,8 @@ const payloadValueLabels: Record<string, string> = {
   director: "Director",
   "assistant-director": "Assistant Director",
   staff: "Staff",
+  male: "Male",
+  female: "Female",
 };
 
 function LongText({ text }: { text: string }) {
@@ -238,7 +256,7 @@ function exportFileName(count: number, context: ExportContext) {
   const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}`;
   const slug = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const parts = ["pysmun-applications"];
-  const programSlugs: Record<string, string> = { "training-camp": "bootcamp", "campus-ambassador": "campus", directorate: "directorate" };
+  const programSlugs: Record<string, string> = { "training-camp": "bootcamp", "campus-ambassador": "campus", directorate: "directorate", delegate: "delegate" };
   if (context.programFilter !== "all") parts.push(programSlugs[context.programFilter] ?? context.programFilter);
   if (context.statusFilter !== "all") parts.push(slug(statusLabels[context.statusFilter] ?? context.statusFilter));
   if (context.paymentFilter !== "all") parts.push(slug(statusLabels[context.paymentFilter] ?? context.paymentFilter));
@@ -269,7 +287,7 @@ function exportRowsAsCsv(rows: ApplicationRow[], context: ExportContext) {
       programNames[row.program_slug],
       row.submitted_at,
       row.review_status,
-      row.program_slug === "training-camp" ? row.payment_status : "",
+      isPaidProgram(row.program_slug) ? row.payment_status : "",
       row.payment_reference ?? "",
       row.applicant_email,
       row.applicant_phone,
@@ -342,7 +360,7 @@ export function AdminConsole() {
     setNotice("");
     const { data, error } = await supabase
       .from("applications")
-      .select("id,reference_code,program_slug,applicant_email,applicant_phone,applicant_cnic,photo_path,review_status,payment_status,payment_reference,receipt_path,cv_path,cv_mime_type,payload,submitted_at")
+      .select("id,reference_code,program_slug,applicant_email,applicant_phone,applicant_cnic,photo_path,review_status,payment_status,payment_reference,receipt_path,cv_path,cv_mime_type,id_document_path,id_document_mime_type,payload,submitted_at")
       .order("submitted_at", { ascending: false });
     if (error) setNotice(`Could not load applications: ${error.message}`);
     else setRows((data ?? []) as ApplicationRow[]);
@@ -443,18 +461,21 @@ export function AdminConsole() {
     accepted: rows.filter((row) => row.review_status === "accepted").length,
     waitlisted: rows.filter((row) => row.review_status === "waitlisted").length,
     rejected: rows.filter((row) => row.review_status === "rejected").length,
-    awaiting: rows.filter((row) => row.program_slug === "training-camp" && row.payment_status === "proof_submitted").length,
-    confirmed: rows.filter((row) => row.program_slug === "training-camp" && row.payment_status === "confirmed").length,
-    invalid: rows.filter((row) => row.program_slug === "training-camp" && row.payment_status === "invalid").length,
+    awaiting: rows.filter((row) => isPaidProgram(row.program_slug) && row.payment_status === "proof_submitted").length,
+    confirmed: rows.filter((row) => isPaidProgram(row.program_slug) && row.payment_status === "confirmed").length,
+    invalid: rows.filter((row) => isPaidProgram(row.program_slug) && row.payment_status === "invalid").length,
     bootcamp: rows.filter((row) => row.program_slug === "training-camp").length,
     campus: rows.filter((row) => row.program_slug === "campus-ambassador").length,
     directorate: rows.filter((row) => row.program_slug === "directorate").length,
+    delegate: rows.filter((row) => row.program_slug === "delegate").length,
     bootcampPending: rows.filter((row) => row.program_slug === "training-camp" && needsReview(row)).length,
     campusPending: rows.filter((row) => row.program_slug === "campus-ambassador" && needsReview(row)).length,
     directoratePending: rows.filter((row) => row.program_slug === "directorate" && needsReview(row)).length,
+    delegatePending: rows.filter((row) => row.program_slug === "delegate" && needsReview(row)).length,
   };
 
   const directorateRows = rows.filter((row) => row.program_slug === "directorate");
+  const delegateRows = rows.filter((row) => row.program_slug === "delegate");
 
   const dayKey = (value: string | Date) => {
     const date = typeof value === "string" ? new Date(value) : value;
@@ -536,6 +557,15 @@ export function AdminConsole() {
   const positionItems = enumValues(directorateRows, "preferredPosition", ["director", "assistant-director", "staff"]);
   const educationItems = enumValues(rows, "educationLevel", ["school", "college", "university", "other"]);
   const experienceItems = enumValues(rows, "experience", ["none", "one-two", "three-plus", "some", "extensive"]);
+  const genderItems = enumValues(delegateRows, "gender", ["male", "female", "other"]);
+  const committeeChoiceItems = committees
+    .map((committee) => ({
+      key: `firstChoiceCommittee:${committee.code}`,
+      value: committee.code,
+      label: committee.name,
+      count: delegateRows.filter((row) => String(row.payload.firstChoiceCommittee ?? "") === committee.code).length,
+    }))
+    .filter((item) => item.count > 0);
 
   // Each stat control toggles its own filter dimension independently — click to
   // apply, click again to clear — so any combination of program/status/payment/
@@ -585,7 +615,7 @@ export function AdminConsole() {
     if (programFilter !== "all" && row.program_slug !== programFilter) return false;
     if (statusFilter === "needs-review" && !needsReview(row)) return false;
     if (statusFilter !== "all" && statusFilter !== "needs-review" && row.review_status !== statusFilter) return false;
-    if (paymentFilter !== "all" && (row.program_slug !== "training-camp" || row.payment_status !== paymentFilter)) return false;
+    if (paymentFilter !== "all" && (!isPaidProgram(row.program_slug) || row.payment_status !== paymentFilter)) return false;
     if (facet && String(row.payload[facet.key] ?? "").trim().toLowerCase() !== facet.value) return false;
     if (dayFilter && dayKey(row.submitted_at) !== dayFilter) return false;
     if (dupOnly && duplicatesOf(row).length === 0) return false;
@@ -598,8 +628,11 @@ export function AdminConsole() {
       row.applicant_cnic,
       String(row.payload.city ?? ""),
       String(row.payload.institution ?? ""),
+      String(row.payload.fieldOfStudy ?? ""),
       payloadValueLabels[String(row.payload.preferredDepartment ?? "")] ?? "",
       payloadValueLabels[String(row.payload.preferredPosition ?? "")] ?? "",
+      committeeNameByCode[String(row.payload.firstChoiceCommittee ?? "")] ?? "",
+      committeeNameByCode[String(row.payload.secondChoiceCommittee ?? "")] ?? "",
     ].join(" ").toLowerCase();
     if (haystack.includes(query)) return true;
     return queryDigits.length >= 4 && `${row.applicant_phone}${row.applicant_cnic}`.replace(/\D/g, "").includes(queryDigits);
@@ -695,13 +728,14 @@ export function AdminConsole() {
                 { key: "training-camp", label: "PYS Bootcamp", count: stats.bootcamp, note: stats.bootcampPending ? `${stats.bootcampPending} pending` : undefined },
                 { key: "campus-ambassador", label: "Campus Ambassador", count: stats.campus, note: stats.campusPending ? `${stats.campusPending} pending` : undefined },
                 { key: "directorate", label: "Directorate", count: stats.directorate, note: stats.directoratePending ? `${stats.directoratePending} pending` : undefined },
+                { key: "delegate", label: "Delegate", count: stats.delegate, note: stats.delegatePending ? `${stats.delegatePending} pending` : undefined },
               ]}
             />
           </section>
 
           <section>
             <header className="admin-panel-head">
-              <p>Payment · PYS Bootcamp</p>
+              <p>Payment</p>
               {duplicateTrxCount > 0 && (
                 <button type="button" className="admin-flag" data-active={dupOnly || undefined} onClick={() => setDupOnly((value) => !value)}>
                   <TriangleAlert aria-hidden="true" />{duplicateTrxCount} shared transaction ID{duplicateTrxCount === 1 ? "" : "s"}
@@ -726,6 +760,8 @@ export function AdminConsole() {
           {facetSection("Education level", "educationLevel", educationItems)}
           {facetSection("MUN experience", "experience", experienceItems)}
           {facetSection("Age", "age", ageItems)}
+          {facetSection("Delegate · gender", "gender", genderItems)}
+          {facetSection("Delegate · 1st choice committee", "firstChoiceCommittee", committeeChoiceItems)}
         </div>
       )}
 
@@ -753,8 +789,8 @@ export function AdminConsole() {
       <div className="admin-toolbar">
         <input
           className="admin-search"
-          placeholder="Search name, email, phone, city, institution, department, CNIC or Application ID"
-          title="Searches names, emails, phone numbers, cities, institutions, Directorate departments and positions, CNICs and Application IDs"
+          placeholder="Search name, email, phone, city, institution, department, committee, CNIC or Application ID"
+          title="Searches names, emails, phone numbers, cities, institutions, Directorate departments and positions, Delegate committee choices, CNICs and Application IDs"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
@@ -762,7 +798,7 @@ export function AdminConsole() {
             and both always reflect the current filters. */}
         <AdminSelect
           value={programFilter}
-          options={[["all", "All programs"], ["training-camp", "PYS Bootcamp"], ["campus-ambassador", "Campus Ambassador"], ["directorate", "Directorate"]]}
+          options={[["all", "All programs"], ["training-camp", "PYS Bootcamp"], ["campus-ambassador", "Campus Ambassador"], ["directorate", "Directorate"], ["delegate", "Delegate"]]}
           onChange={setProgramFilter}
           ariaLabel="Filter by program"
         />
@@ -804,6 +840,7 @@ export function AdminConsole() {
                     void openFile(row, row.photo_path);
                     if (row.receipt_path) void openFile(row, row.receipt_path);
                     if (row.cv_path) void openFile(row, row.cv_path);
+                    if (row.id_document_path) void openFile(row, row.id_document_path);
                   }
                 }}
                 aria-expanded={expanded}
@@ -813,18 +850,19 @@ export function AdminConsole() {
                 <span>{programNames[row.program_slug]}</span>
                 <span className="admin-row__chips">
                   <span className="admin-chip" data-status={row.review_status}>{statusLabels[row.review_status] ?? row.review_status}</span>
-                  {/* Only the Bootcamp collects payment; other programs show no
+                  {/* Only paid programs collect payment; other programs show no
                       payment chip at all rather than claiming to be free. */}
-                  {row.program_slug === "training-camp" && (
+                  {isPaidProgram(row.program_slug) && (
                     <span className="admin-chip" data-payment={row.payment_status}>{statusLabels[row.payment_status] ?? row.payment_status}</span>
                   )}
                 </span>
               </button>
 
               {expanded && (
-                // The third column holds either the payment aside (Bootcamp) or
-                // the CV aside (Directorate); only collapse when neither exists.
-                <div className="admin-row__detail" data-narrow={(row.program_slug !== "training-camp" && !row.cv_path) || undefined}>
+                // The third column holds the payment aside (paid programs), the
+                // CV aside (Directorate) and/or the ID document aside (Delegate);
+                // only collapse when none of those exist.
+                <div className="admin-row__detail" data-narrow={(!isPaidProgram(row.program_slug) && !row.cv_path && !row.id_document_path) || undefined}>
                   <figure className="admin-detail__portrait">
                     {fileUrls[row.photo_path]
                       ? <button type="button" className="admin-media-open" onClick={() => setLightbox({ url: fileUrls[row.photo_path], title: `Applicant photo · ${row.reference_code}` })} aria-label="View photo full size">
@@ -857,7 +895,7 @@ export function AdminConsole() {
                           return (first === -1 ? 99 : first) - (second === -1 ? 99 : second);
                         })
                         .map(([key, value]) => (
-                          <div key={key}><dt>{fieldLabel(key)}</dt><dd>{payloadValueLabels[String(value)] ?? String(value)}</dd></div>
+                          <div key={key}><dt>{fieldLabel(key)}</dt><dd>{(key === "firstChoiceCommittee" || key === "secondChoiceCommittee") ? (committeeNameByCode[String(value)] ?? String(value)) : (payloadValueLabels[String(value)] ?? String(value))}</dd></div>
                         ))}
                     </dl>
                     {longTextKeys.some((key) => row.payload[key]) && (
@@ -874,7 +912,7 @@ export function AdminConsole() {
                     )}
                   </div>
 
-                  {row.program_slug === "training-camp" && (
+                  {isPaidProgram(row.program_slug) && (
                     <aside className="admin-detail__payment">
                       <p className="admin-detail__payment-title">Payment verification</p>
                       <figure>
@@ -887,6 +925,14 @@ export function AdminConsole() {
                             : <span className="admin-media-loading"><LoaderCircle className="spin" aria-hidden="true" /></span>
                           : <span className="admin-media-empty">No receipt submitted</span>}
                       </figure>
+                      {typeof row.payload.feeTier === "string" && (
+                        <div className="admin-transaction">
+                          <span>Fee tier</span>
+                          <div className="admin-transaction__value">
+                            <strong>{row.payload.feeTier === "early-bird" ? "Early bird" : "Regular"}{row.payload.feeAmount ? ` · Rs. ${row.payload.feeAmount}` : ""}</strong>
+                          </div>
+                        </div>
+                      )}
                       {row.payment_reference && (
                         <div className="admin-transaction">
                           <span>Transaction reference</span>
@@ -921,6 +967,22 @@ export function AdminConsole() {
                     </aside>
                   )}
 
+                  {row.id_document_path && (
+                    <aside className="admin-detail__payment">
+                      <p className="admin-detail__payment-title">CNIC / B-Form document</p>
+                      <figure>
+                        {fileUrls[row.id_document_path]
+                          ? row.id_document_mime_type === "application/pdf"
+                            ? <a className="admin-media-open" href={fileUrls[row.id_document_path]} target="_blank" rel="noreferrer" aria-label="Open ID document in a new tab"><FileText aria-hidden="true" /></a>
+                            : <button type="button" className="admin-media-open" onClick={() => setLightbox({ url: fileUrls[row.id_document_path!], title: `ID document · ${row.reference_code}` })} aria-label="View ID document full size">
+                                {/* eslint-disable-next-line @next/next/no-img-element -- short-lived signed URL */}
+                                <img src={fileUrls[row.id_document_path]} alt={`ID document for ${row.reference_code}`} />
+                              </button>
+                          : <span className="admin-media-loading"><LoaderCircle className="spin" aria-hidden="true" /></span>}
+                      </figure>
+                    </aside>
+                  )}
+
                   <div className="admin-actions">
                     <div>
                       <p>Application</p>
@@ -931,7 +993,7 @@ export function AdminConsole() {
                         })}
                       </div>
                     </div>
-                    {row.program_slug === "training-camp" && (
+                    {isPaidProgram(row.program_slug) && (
                       <div>
                         <p>Payment</p>
                         <div className="admin-actions__row">

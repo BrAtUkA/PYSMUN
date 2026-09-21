@@ -21,7 +21,7 @@ export type ApplicationPhoto = {
 };
 
 export type ParsedApplicationSubmission =
-  | { ok: true; input: unknown; photo: ApplicationPhoto; receipt?: ApplicationPhoto; cv?: ApplicationPhoto }
+  | { ok: true; input: unknown; photo: ApplicationPhoto; receipt?: ApplicationPhoto; cv?: ApplicationPhoto; idDocument?: ApplicationPhoto }
   | { ok: false; message: string; issues?: Record<string, string[]> };
 
 function hasBytes(bytes: Uint8Array, expected: number[], offset = 0) {
@@ -63,7 +63,7 @@ async function readImageField(form: FormData, field: string, label: string, kind
   return { ok: true, image: { data, contentType, extension: allowedTypes[contentType as keyof typeof allowedTypes], size: file.size } };
 }
 
-export async function parseApplicationSubmission(request: Request, options?: { withReceipt?: boolean; withCv?: boolean }): Promise<ParsedApplicationSubmission> {
+export async function parseApplicationSubmission(request: Request, options?: { withReceipt?: boolean; withCv?: boolean; withIdDocument?: boolean }): Promise<ParsedApplicationSubmission> {
   let form: FormData;
   try {
     form = await request.formData();
@@ -100,5 +100,12 @@ export async function parseApplicationSubmission(request: Request, options?: { w
     cv = cvResult.image;
   }
 
-  return { ok: true, input, photo: photo.image, receipt, cv };
+  let idDocument: ApplicationPhoto | undefined;
+  if (options?.withIdDocument) {
+    const idDocumentResult = await readImageField(form, "idDocument", "ID document", "document");
+    if (!idDocumentResult.ok) return idDocumentResult;
+    idDocument = idDocumentResult.image;
+  }
+
+  return { ok: true, input, photo: photo.image, receipt, cv, idDocument };
 }

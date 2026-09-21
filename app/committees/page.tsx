@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { CommitteeBadge } from "@/components/committee-badge";
 import { PageMotionField } from "@/components/page-motion-field";
 import { Reveal } from "@/components/reveal";
 import { committees } from "@/lib/content";
 
 export const metadata: Metadata = {
-  title: "Committees — UNSC, UNHRC, DISEC & More",
-  description: "Explore PYSMUN's eight Model United Nations committees, from the UN Security Council, Human Rights Council and WHO to crisis and fictional committees.",
+  title: "Committees — PNA, CRISIS, UNHRC & More",
+  description: "Explore PYSMUN's five Model United Nations committees, from national policy and human rights to a continuous crisis committee, UN Women and one fictional committee still under wraps.",
 };
 
 export default function CommitteesPage() {
@@ -17,17 +18,21 @@ export default function CommitteesPage() {
             <PageMotionField word="UNITED NATIONS" mobileWord="UN" className="committees-motion-field" />
             <div>
               <p className="eyebrow">PYSMUN Committees</p>
-              <h1>Eight rooms. <em>Six revealed.</em></h1>
+              <h1>Five rooms. <em>Four revealed.</em></h1>
             </div>
             <div className="committees-overview__meta">
-              <p>From global security and human rights to two fictional worlds still under wraps.</p>
+              <p>From national policy and human rights to gender equality, crisis response and one fictional world still under wraps.</p>
               <span>Final reveals, agendas and dais announcements will follow.</span>
             </div>
           </header>
           <Reveal className="committee-list-page committee-list-page--overview">
             {committees.map((committee) => (
               <div className={`committee-row${committee.sealed ? " committee-row--sealed" : ""}`} key={committee.code}>
-                <strong>{committee.code}</strong><h2>{committee.name}</h2><p>{committee.tone}</p>
+                <span className="committee-row__mark">
+                  <CommitteeBadge committee={committee} className="committee-badge--row" />
+                  <strong>{committee.code}</strong>
+                </span>
+                <h2>{committee.name}</h2><p>{committee.tone}</p>
               </div>
             ))}
           </Reveal>

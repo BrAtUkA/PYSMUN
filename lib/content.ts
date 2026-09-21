@@ -26,6 +26,36 @@ export const bootcampFacts = {
   ages: "15–23",
 };
 
+// Programs whose form collects a real payment (fee slip + TRX + receipt),
+// as opposed to Campus Ambassador/Directorate which are free. Shared so the
+// admin console and status timeline don't each hardcode their own list.
+export const paidPrograms = ["training-camp", "delegate"] as const;
+
+export type DelegateFeeTier = "early-bird" | "regular";
+
+export const delegateFacts = {
+  earlyBirdFee: "Rs. 4,000",
+  earlyBirdFeeAmount: "4000",
+  regularFee: "Rs. 5,000",
+  regularFeeAmount: "5000",
+  // Early bird pricing is valid through the end of this date in Pakistan
+  // time. Display copy derived from this: earlyBirdEndsDisplay/regularStartsDisplay.
+  earlyBirdDeadlineDate: "2026-10-07",
+  earlyBirdEndsDisplay: "October 7",
+  regularStartsDisplay: "October 8",
+  ages: "15–23",
+};
+
+export function currentDelegateFee(now: Date = new Date()): { tier: DelegateFeeTier; label: string; fee: string; feeAmount: string } {
+  // earlyBirdDeadlineDate is a Pakistan-local calendar date (the site's only
+  // audience), so the cutoff instant is midnight PKT at the start of the next
+  // day, i.e. 19:00 UTC on the deadline date itself (PKT is UTC+5).
+  const isEarlyBird = now.getTime() < new Date(`${delegateFacts.earlyBirdDeadlineDate}T19:00:00Z`).getTime();
+  return isEarlyBird
+    ? { tier: "early-bird", label: "Early bird", fee: delegateFacts.earlyBirdFee, feeAmount: delegateFacts.earlyBirdFeeAmount }
+    : { tier: "regular", label: "Regular", fee: delegateFacts.regularFee, feeAmount: delegateFacts.regularFeeAmount };
+}
+
 export const opportunities = [
   {
     id: "pys-bootcamp",
@@ -65,8 +95,9 @@ export const opportunities = [
     title: "Delegates",
     description: "Represent, negotiate and turn an informed position into collective action.",
     href: "/applications/delegate",
-    status: "coming-soon" as ApplicationStatus,
+    status: "open" as ApplicationStatus,
     number: "04",
+    fee: currentDelegateFee().fee,
   },
 ];
 
@@ -81,15 +112,16 @@ export function formatTitleList(items: { title: string }[]) {
   return `${titles.slice(0, -1).join(", ")} and ${titles[titles.length - 1]}`;
 }
 
+// `color`/`colorTo` are each committee's own brand color (sampled from the
+// logo Saim provided), used as the fill behind its white logo mark wherever
+// committees are shown, so each one is recognizable by color at a glance
+// instead of every badge looking the same.
 export const committees = [
-  { code: "UNHRC", name: "United Nations Human Rights Council", tone: "Human dignity", index: "01", sealed: false },
-  { code: "DISEC", name: "Disarmament & International Security", tone: "Global security", index: "02", sealed: false },
-  { code: "UNSC", name: "United Nations Security Council", tone: "Peace & security", index: "03", sealed: false },
-  { code: "WHO", name: "World Health Organization", tone: "Global health", index: "04", sealed: false },
-  { code: "PNA", name: "Pakistan National Assembly", tone: "National policy", index: "05", sealed: false },
-  { code: "CRISIS", name: "Continuous Crisis Committee", tone: "Decisions in motion", index: "06", sealed: false },
-  { code: "Reveal I", name: "Fictional committee", tone: "Identity withheld", index: "07", sealed: true },
-  { code: "Reveal II", name: "Fictional committee", tone: "Identity withheld", index: "08", sealed: true },
+  { code: "PNA", name: "Pakistan National Assembly", tone: "National policy", index: "01", sealed: false, logo: "/committees/pna.png", color: "#004020", colorTo: "#004020" },
+  { code: "CRISIS", name: "Continuous Crisis Committee", tone: "Decisions in motion", index: "02", sealed: false, logo: "/committees/crisis.png", color: "#400313", colorTo: "#400313" },
+  { code: "UNHRC", name: "United Nations Human Rights Council", tone: "Human dignity", index: "03", sealed: false, logo: "/committees/unhrc.png", color: "#0868b0", colorTo: "#0868b0" },
+  { code: "UN WOMEN", name: "UN Women", tone: "Gender equality", index: "04", sealed: false, logo: "/committees/un-women.png", color: "#2cb3ed", colorTo: "#2a7bd4" },
+  { code: "Reveal", name: "Fictional committee", tone: "Identity withheld", index: "05", sealed: true, logo: null, color: "#8a742c", colorTo: "#8a742c" },
 ];
 
 export const faqs = [
@@ -121,6 +153,10 @@ export const faqs = [
   },
   {
     question: "Are Directorate and Delegate applications open?",
-    answer: `Directorate applications have closed for this cycle.${upcomingOpportunities.length > 0 ? ` Applications for ${formatTitleList(upcomingOpportunities)} will follow.` : ""}`,
+    answer: `Directorate applications have closed for this cycle.${openOpportunities.some((item) => item.id === "delegate") ? " Delegate applications are open now." : upcomingOpportunities.length > 0 ? ` Applications for ${formatTitleList(upcomingOpportunities)} will follow.` : ""}`,
+  },
+  {
+    question: "How much do Delegate applications cost?",
+    answer: `The Delegate fee is ${delegateFacts.earlyBirdFee} for early bird applicants through ${delegateFacts.earlyBirdEndsDisplay}, rising to ${delegateFacts.regularFee} from ${delegateFacts.regularStartsDisplay} onward.`,
   },
 ];

@@ -11,6 +11,14 @@ import "@fontsource/instrument-serif/400.css";
 import "@fontsource/instrument-serif/400-italic.css";
 import "./globals.css";
 
+// Site-wide ISR default: nothing here needs to be dynamic per-request, but
+// several pages read facts (open programs, Delegate's fee tier) that should
+// change on their own over time without a manual redeploy. An hourly refresh
+// costs nothing for pages that never change and keeps time-sensitive copy
+// close to accurate everywhere, rather than relying on remembering to opt
+// specific pages in one at a time.
+export const revalidate = 3600;
+
 const socialDescription = openOpportunities.length > 0
   ? `${formatTitleList(openOpportunities)} applications are open at Pakistan Youth Summit Model United Nations. Step into the room where ideas become resolutions.`
   : `Explore the PYS Bootcamp, held ${bootcampFacts.dates} in ${bootcampFacts.city}. Applications for this intake are closed. Step into the room where ideas become resolutions.`;

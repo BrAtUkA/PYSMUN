@@ -3,12 +3,12 @@
 import { ArrowLeft, ArrowRight, Check, LoaderCircle, TriangleAlert } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { emailPattern } from "@/lib/contact-validation";
-import { bootcampFacts, siteConfig } from "@/lib/content";
+import { bootcampFacts, paidPrograms, siteConfig } from "@/lib/content";
 import { timeAgo } from "@/lib/time";
 
 type StatusResult = {
   referenceCode: string;
-  program: "training-camp" | "campus-ambassador" | "directorate";
+  program: "training-camp" | "campus-ambassador" | "directorate" | "delegate";
   fullName: string;
   submittedAt: string;
   reviewStatus: string;
@@ -25,6 +25,7 @@ const programNames: Record<StatusResult["program"], string> = {
   "training-camp": "PYS Bootcamp",
   "campus-ambassador": "Campus Ambassador",
   directorate: "Directorate",
+  delegate: "Delegate",
 };
 
 function buildStages(result: StatusResult): Stage[] {
@@ -32,7 +33,10 @@ function buildStages(result: StatusResult): Stage[] {
   const first = result.fullName?.trim().split(/\s+/)[0];
   const greeting = first && first.length <= 20 ? `, ${first}` : "";
 
-  if (result.program === "training-camp") {
+  if (paidPrograms.includes(result.program as (typeof paidPrograms)[number])) {
+    const isDelegate = result.program === "delegate";
+    const decisionLabel = isDelegate ? "Allotment decision" : "Seat decision";
+    const confirmedLabel = isDelegate ? "Committee allotment" : "Seat confirmed";
     const payment = result.paymentStatus;
     const stages: Stage[] = [
       { label: "Application received", description: `Thanks${greeting}. Your application and payment receipt are safely in our records.`, state: "done" },
@@ -47,13 +51,19 @@ function buildStages(result: StatusResult): Stage[] {
     }
 
     if (review === "rejected") {
-      stages.push({ label: "Seat decision", description: "We could not offer a seat this time. Thank you for applying.", state: "issue" });
+      stages.push({ label: decisionLabel, description: "We could not offer a seat this time. Thank you for applying.", state: "issue" });
     } else if (review === "waitlisted") {
-      stages.push({ label: "Seat decision", description: "You are on the waiting list. We will contact you if a seat opens.", state: "current" });
+      stages.push({ label: decisionLabel, description: "You are on the waiting list. We will contact you if a seat opens.", state: "current" });
     } else if (payment === "confirmed") {
-      stages.push({ label: "Seat confirmed", description: `Your seat is reserved${greeting}. Camp details arrive by email and WhatsApp before ${bootcampFacts.datesShort}.`, state: "done" });
+      stages.push({
+        label: confirmedLabel,
+        description: isDelegate
+          ? `Your committee and country or personality allotment is confirmed${greeting}. Study guides and conference details arrive by email and WhatsApp.`
+          : `Your seat is reserved${greeting}. Camp details arrive by email and WhatsApp before ${bootcampFacts.datesShort}.`,
+        state: "done",
+      });
     } else {
-      stages.push({ label: "Seat confirmed", description: "Confirmed as soon as your payment is verified. This page updates the moment it happens.", state: "upcoming" });
+      stages.push({ label: confirmedLabel, description: "Confirmed as soon as your payment is verified. This page updates the moment it happens.", state: "upcoming" });
     }
     return stages;
   }
@@ -101,7 +111,7 @@ export function ApplicationStatusLookup() {
 
   const lookup = async (event: FormEvent) => {
     event.preventDefault();
-    if (!/^(TC|CA|DR)-\d{2}-\d{4}$/.test(referenceCode)) {
+    if (!/^(TC|CA|DR|DL)-\d{2}-\d{4}$/.test(referenceCode)) {
       setMessage("Enter your Application ID, e.g. TC‑26‑1234.");
       return;
     }

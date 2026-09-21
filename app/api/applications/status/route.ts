@@ -5,7 +5,7 @@ import { emailPattern } from "@/lib/contact-validation";
 
 export const runtime = "nodejs";
 
-const referencePattern = /^(TC|CA|DR)-\d{2}-\d{4}$/i;
+const referencePattern = /^(TC|CA|DR|DL)-\d{2}-\d{4}$/i;
 
 const attempts = new Map<string, { count: number; resetsAt: number }>();
 
