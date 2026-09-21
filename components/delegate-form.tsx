@@ -265,7 +265,7 @@ export function DelegateForm({ currentFee }: { currentFee: CurrentFee }) {
   if (status === "success") {
     return <FormSuccess
       title={<>You&rsquo;re on<br /><em>the floor.</em></>}
-      note="Your Delegate application is with the PYSMUN team."
+      note="Your Delegate form is with the PYSMUN team."
       reference={reference}
       steps={[
         "Your payment is verified within 24 hours",
@@ -333,7 +333,7 @@ export function DelegateForm({ currentFee }: { currentFee: CurrentFee }) {
 
         {step === 4 && <fieldset><legend>Review and submit.</legend><p className="form-legend-copy">Check your information before sending it to the PYSMUN team.</p>
           <ReviewLedger photo={photo} idDocument={idDocument} receipt={receipt} rows={[["Program", "Delegate"], ["Name", values.fullName], ["Email", values.email], ["Contact", `+92 ${formatPakistaniNationalNumber(values.whatsapp)}`], ["Gender", genderLabels[values.gender] || values.gender], ["Age", values.age], ["CNIC / B-Form", values.cnic], ["Institution", values.institution], ["Field of study", values.fieldOfStudy], ["Grade / semester", values.gradeSemester], ["Emergency contact", `+92 ${formatPakistaniNationalNumber(values.emergencyContact)}`], ["1st choice committee", committeeLabels[values.firstChoiceCommittee] || values.firstChoiceCommittee], ["2nd choice committee", committeeLabels[values.secondChoiceCommittee] || values.secondChoiceCommittee], ["Country / personality preference", values.countryPreference], ["Fee paid", currentFee.fee], ["Transaction ID", values.transactionReference]]} />
-          <label className="consent"><input type="checkbox" checked={values.consent} onChange={(event) => update("consent", event.target.checked)} /><span>I confirm this information is accurate and consent to PYSMUN securely using my details, CNIC, photo, ID document and payment information to process my Delegate application and contact me about committee allotment. I understand the fee is non-refundable.</span></label>{errors.consent && <p className="form-error">{errors.consent[0]}</p>}{siteKey && <div className="cf-turnstile" data-sitekey={siteKey} data-theme="light" />}</fieldset>}
+          <label className="consent"><input type="checkbox" checked={values.consent} onChange={(event) => update("consent", event.target.checked)} /><span>I confirm this information is accurate and consent to PYSMUN securely using my details, CNIC, photo, ID document and payment information to process my Delegate form and contact me about committee allotment. I understand the fee is non-refundable.</span></label>{errors.consent && <p className="form-error">{errors.consent[0]}</p>}{siteKey && <div className="cf-turnstile" data-sitekey={siteKey} data-theme="light" />}</fieldset>}
       </div>
 
       {message && <p className="form-message form-message--mobile" role="alert">{message}</p>}

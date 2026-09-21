@@ -4,7 +4,7 @@ import { DelegateForm } from "@/components/delegate-form";
 import { currentDelegateFee, opportunities } from "@/lib/content";
 
 export const metadata: Metadata = {
-  title: "Delegate Applications",
+  title: "Delegate Form",
   description: "Represent, negotiate and turn an informed position into collective action at PYSMUN.",
 };
 

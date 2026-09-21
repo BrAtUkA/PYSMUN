@@ -153,11 +153,11 @@ export const faqs = [
     answer: "You will practice rules of procedure, structured public speaking, negotiation, caucusing, resolution writing and committee strategy through guided exercises.",
   },
   {
-    question: "Are Directorate and Delegate applications open?",
-    answer: `Directorate applications have closed for this cycle.${openOpportunities.some((item) => item.id === "delegate") ? " Delegate applications are open now." : upcomingOpportunities.length > 0 ? ` Applications for ${formatTitleList(upcomingOpportunities)} will follow.` : ""}`,
+    question: "Are Directorate applications and the Delegate form open?",
+    answer: `Directorate applications have closed for this cycle.${openOpportunities.some((item) => item.id === "delegate") ? " The Delegate form is open now." : upcomingOpportunities.length > 0 ? ` Applications for ${formatTitleList(upcomingOpportunities)} will follow.` : ""}`,
   },
   {
-    question: "How much do Delegate applications cost?",
+    question: "How much does the Delegate form cost?",
     answer: `The Delegate fee is ${delegateFacts.earlyBirdFee} for early bird applicants through ${delegateFacts.earlyBirdEndsDisplay}, rising to ${delegateFacts.regularFee} from ${delegateFacts.regularStartsDisplay} onward.`,
   },
 ];

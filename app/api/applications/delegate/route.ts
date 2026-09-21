@@ -41,7 +41,7 @@ async function verifyTurnstile(token?: string) {
 export async function POST(request: Request) {
   const applicationsOpen = opportunities.some((item) => item.id === "delegate" && item.status === "open");
   if (!applicationsOpen) {
-    return NextResponse.json({ message: "Delegate applications are closed." }, { status: 410 });
+    return NextResponse.json({ message: "The Delegate form is closed." }, { status: 410 });
   }
 
   if (rateLimited(request)) return NextResponse.json({ message: "Too many attempts. Please try again shortly." }, { status: 429 });
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Application received.", referenceCode: result.referenceCode }, { status: 201 });
   } catch (error) {
     if (error instanceof Error && error.message === "DUPLICATE_APPLICATION") {
-      return NextResponse.json({ message: "A Delegate application using this email, WhatsApp number or CNIC has already been received." }, { status: 409 });
+      return NextResponse.json({ message: "A Delegate form using this email, WhatsApp number or CNIC has already been received." }, { status: 409 });
     }
     console.error("Delegate application error", error);
     return NextResponse.json({ message: "We could not save your application. Please try again." }, { status: 500 });
