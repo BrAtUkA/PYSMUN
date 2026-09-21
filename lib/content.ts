@@ -112,16 +112,15 @@ export function formatTitleList(items: { title: string }[]) {
   return `${titles.slice(0, -1).join(", ")} and ${titles[titles.length - 1]}`;
 }
 
-// `color`/`colorTo` are each committee's own brand color (sampled from the
-// logo Saim provided), used as the fill behind its white logo mark wherever
-// committees are shown, so each one is recognizable by color at a glance
-// instead of every badge looking the same.
+// `color`/`colorTo` are the gold gradient behind every committee's white
+// logo mark (Saim's call: one consistent PYSMUN-gold badge treatment
+// everywhere, rather than each committee's own brand color).
 export const committees = [
-  { code: "PNA", name: "Pakistan National Assembly", tone: "National policy", index: "01", sealed: false, logo: "/committees/pna.png", color: "#004020", colorTo: "#004020" },
-  { code: "CRISIS", name: "Continuous Crisis Committee", tone: "Decisions in motion", index: "02", sealed: false, logo: "/committees/crisis.png", color: "#400313", colorTo: "#400313" },
-  { code: "UNHRC", name: "United Nations Human Rights Council", tone: "Human dignity", index: "03", sealed: false, logo: "/committees/unhrc.png", color: "#0868b0", colorTo: "#0868b0" },
-  { code: "UN WOMEN", name: "UN Women", tone: "Gender equality", index: "04", sealed: false, logo: "/committees/un-women.png", color: "#2cb3ed", colorTo: "#2a7bd4" },
-  { code: "Reveal", name: "Fictional committee", tone: "Identity withheld", index: "05", sealed: true, logo: null, color: "#8a742c", colorTo: "#8a742c" },
+  { code: "PNA", name: "Pakistan National Assembly", tone: "National policy", index: "01", sealed: false, logo: "/committees/pna.png", color: "#8a742c", colorTo: "#d8c88a" },
+  { code: "CRISIS", name: "Continuous Crisis Committee", tone: "Decisions in motion", index: "02", sealed: false, logo: "/committees/crisis.png", color: "#8a742c", colorTo: "#d8c88a" },
+  { code: "UNHRC", name: "United Nations Human Rights Council", tone: "Human dignity", index: "03", sealed: false, logo: "/committees/unhrc.png", color: "#8a742c", colorTo: "#d8c88a" },
+  { code: "UN WOMEN", name: "UN Women", tone: "Gender equality", index: "04", sealed: false, logo: "/committees/un-women.png", color: "#8a742c", colorTo: "#d8c88a" },
+  { code: "Reveal", name: "Fictional committee", tone: "Identity withheld", index: "05", sealed: true, logo: null, color: "#8a742c", colorTo: "#d8c88a" },
 ];
 
 export const faqs = [
