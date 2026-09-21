@@ -144,7 +144,7 @@ export default function Home() {
           <div className={styles.numberGrid}>
             {[
               [500, "+", "Delegates", "Target"],
-              [8, "", "Committees", "Confirmed"],
+              [committees.length, "", "Committees", "Confirmed"],
               [30, "+", "Institutions", "Target"],
               [3, "", "Conference days", "Planned"],
             ].map(([value, suffix, label, note]) => (
