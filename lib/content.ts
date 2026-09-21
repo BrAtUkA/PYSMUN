@@ -112,15 +112,17 @@ export function formatTitleList(items: { title: string }[]) {
   return `${titles.slice(0, -1).join(", ")} and ${titles[titles.length - 1]}`;
 }
 
-// `color`/`colorTo` are the gold gradient behind every committee's white
-// logo mark (Saim's call: one consistent PYSMUN-gold badge treatment
-// everywhere, rather than each committee's own brand color).
+// Flat gold marks, no badge/avatar shape (Saim's call). `logo` is the darker
+// accent gold (#8a742c) for use on the site's light/ivory surfaces;
+// `logoOnDark` is the same mark in the lighter --gold (#d8c88a) for the
+// homepage's dark committee index, matching how the rest of the site
+// already swaps between those two gold tones by background.
 export const committees = [
-  { code: "PNA", name: "Pakistan National Assembly", tone: "National policy", index: "01", sealed: false, logo: "/committees/pna.png", color: "#8a742c", colorTo: "#d8c88a" },
-  { code: "CRISIS", name: "Continuous Crisis Committee", tone: "Decisions in motion", index: "02", sealed: false, logo: "/committees/crisis.png", color: "#8a742c", colorTo: "#d8c88a" },
-  { code: "UNHRC", name: "United Nations Human Rights Council", tone: "Human dignity", index: "03", sealed: false, logo: "/committees/unhrc.png", color: "#8a742c", colorTo: "#d8c88a" },
-  { code: "UN WOMEN", name: "UN Women", tone: "Gender equality", index: "04", sealed: false, logo: "/committees/un-women.png", color: "#8a742c", colorTo: "#d8c88a" },
-  { code: "Reveal", name: "Fictional committee", tone: "Identity withheld", index: "05", sealed: true, logo: null, color: "#8a742c", colorTo: "#d8c88a" },
+  { code: "PNA", name: "Pakistan National Assembly", tone: "National policy", index: "01", sealed: false, logo: "/committees/pna.png", logoOnDark: "/committees/pna-on-dark.png" },
+  { code: "CRISIS", name: "Continuous Crisis Committee", tone: "Decisions in motion", index: "02", sealed: false, logo: "/committees/crisis.png", logoOnDark: "/committees/crisis-on-dark.png" },
+  { code: "UNHRC", name: "United Nations Human Rights Council", tone: "Human dignity", index: "03", sealed: false, logo: "/committees/unhrc.png", logoOnDark: "/committees/unhrc-on-dark.png" },
+  { code: "UN WOMEN", name: "UN Women", tone: "Gender equality", index: "04", sealed: false, logo: "/committees/un-women.png", logoOnDark: "/committees/un-women-on-dark.png" },
+  { code: "Reveal", name: "Fictional committee", tone: "Identity withheld", index: "05", sealed: true, logo: null, logoOnDark: null },
 ];
 
 export const faqs = [

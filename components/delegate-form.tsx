@@ -6,7 +6,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { Field, FormRail, FormSuccess, PhoneField, ReviewLedger, SelectField, StepNumeral, TextareaField } from "@/components/application-form-kit";
 import { ApplicationDocumentField } from "@/components/application-document-field";
 import { ApplicationPhotoField } from "@/components/application-photo-field";
-import { CommitteeBadge } from "@/components/committee-badge";
+import { CommitteeIcon } from "@/components/committee-icon";
 import { cnicPattern, formatCnic } from "@/lib/cnic";
 import { emailPattern, formatPakistaniNationalNumber, pakistaniMobileMessage, pakistaniNationalMobilePattern } from "@/lib/contact-validation";
 import { committees, delegateFacts } from "@/lib/content";
@@ -71,7 +71,7 @@ function CommitteePicker({ label, name, value, otherValue, onChange, error }: {
               data-selected={selected || undefined}
               onClick={() => onChange(name, committee.code)}
             >
-              <CommitteeBadge committee={committee} className="committee-badge--picker" />
+              <CommitteeIcon committee={committee} className="committee-icon--picker" />
               <span>{committee.name}</span>
             </button>
           );

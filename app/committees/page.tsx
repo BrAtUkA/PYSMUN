@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CommitteeBadge } from "@/components/committee-badge";
+import { CommitteeIcon } from "@/components/committee-icon";
 import { PageMotionField } from "@/components/page-motion-field";
 import { Reveal } from "@/components/reveal";
 import { committees } from "@/lib/content";
@@ -29,7 +29,7 @@ export default function CommitteesPage() {
             {committees.map((committee) => (
               <div className={`committee-row${committee.sealed ? " committee-row--sealed" : ""}`} key={committee.code}>
                 <span className="committee-row__mark">
-                  <CommitteeBadge committee={committee} className="committee-badge--row" />
+                  <CommitteeIcon committee={committee} className="committee-icon--row" />
                   <strong>{committee.code}</strong>
                 </span>
                 <h2>{committee.name}</h2><p>{committee.tone}</p>

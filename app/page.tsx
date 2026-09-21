@@ -1,5 +1,5 @@
 import { AnimatedCounter } from "@/components/animated-counter";
-import { CommitteeBadge } from "@/components/committee-badge";
+import { CommitteeIcon } from "@/components/committee-icon";
 import { HeroLetterField } from "@/components/hero-letter-field";
 import { Reveal } from "@/components/reveal";
 import { applicationStatusLabels, committees, countWords, openOpportunities, opportunities } from "@/lib/content";
@@ -193,7 +193,7 @@ export default function Home() {
           <div className={styles.committeeIndex}>
             {committees.map((committee) => (
               <Reveal className={`${styles.committeeEntry}${committee.sealed ? ` ${styles.committeeEntrySealed}` : ""}`} tapFeedback key={committee.code}>
-                <CommitteeBadge committee={committee} className={`${styles.committeeMark} committee-badge--card`} />
+                <CommitteeIcon committee={committee} onDark className={`${styles.committeeMark} committee-icon--card`} />
                 <p>{committee.tone}</p>
                 <strong>{committee.code}</strong>
                 <h3>{committee.name}</h3>

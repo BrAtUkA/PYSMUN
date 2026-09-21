@@ -555,7 +555,7 @@ img, svg, canvas { display: block; max-width: 100%; }
   .committee-list-page--overview .committee-row { grid-template-columns: minmax(4.5rem,.65fr) minmax(0,1.35fr); gap: .55rem; padding-block: .25rem; padding-inline: .35rem; }
   .committee-list-page--overview .committee-row:hover { padding-inline: .55rem .15rem; }
   .committee-row__mark { gap: .5rem; }
-  .committee-badge--row { width: 1.85rem; height: 1.85rem; }
+  .committee-icon--row { width: 1.6rem; height: 1.6rem; }
   .committee-list-page--overview .committee-row__mark > strong { font-size: clamp(1.55rem,7.3vw,2.05rem); }
   .committee-list-page--overview .committee-row--sealed .committee-row__mark > strong { font-size: 1.3rem; line-height: 1; }
   .committee-list-page--overview .committee-row--sealed h2 { font-size: .68rem; }
@@ -707,15 +707,17 @@ img, svg, canvas { display: block; max-width: 100%; }
 .consent { display: grid; grid-template-columns: 1.2rem 1fr; gap: .8rem; align-items: start; color: #4e5b6b; line-height: 1.6; }
 .consent input { width: 1.1rem; height: 1.1rem; margin-top: .2rem; accent-color: #8a742c; }
 
-/* Committee badges: each committee's own brand color + logo, reused across
-   the committees page, homepage index and the Delegate form's picker. */
-.committee-badge { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 50%; overflow: hidden; box-shadow: 0 2px 6px rgba(9,17,30,.22); }
-.committee-badge img { width: 58%; height: 58%; object-fit: contain; }
-.committee-badge svg { width: 42%; height: 42%; color: #fff; opacity: .9; }
-.committee-badge[data-sealed] { box-shadow: 0 2px 6px rgba(9,17,30,.22), inset 0 0 0 2px rgba(255,255,255,.32); }
-.committee-badge--row { width: 2.6rem; height: 2.6rem; }
-.committee-badge--card { width: 2.35rem; height: 2.35rem; }
-.committee-badge--picker { width: 3.15rem; height: 3.15rem; margin-bottom: .1rem; }
+/* Committee marks: flat gold icons, no badge/avatar shape, reused across the
+   committees page, homepage index and the Delegate form's picker. The PNG
+   itself already carries the right gold (darker accent, or the lighter
+   --gold cut for dark backgrounds via .committee-icon--on-dark); the sealed
+   committee's placeholder glyph is colored to match here instead. */
+.committee-icon { display: inline-block; flex-shrink: 0; object-fit: contain; }
+.committee-icon--placeholder { color: #8a742c; }
+.committee-icon--placeholder.committee-icon--on-dark { color: var(--gold); }
+.committee-icon--row { width: 2.15rem; height: 2.15rem; }
+.committee-icon--card { width: 1.9rem; height: 1.9rem; }
+.committee-icon--picker { width: 2.65rem; height: 2.65rem; margin-bottom: .2rem; }
 
 .committee-row__mark { display: flex; align-items: center; gap: .9rem; }
 
