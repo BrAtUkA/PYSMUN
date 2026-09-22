@@ -171,32 +171,6 @@ export const committees = [
 
 export const faqs = [
   {
-    question: "Do I need previous MUN experience?",
-    answer: "No. The PYS Bootcamp is designed to give first-time participants a confident start while still offering practical simulations for experienced delegates.",
-  },
-  {
-    question: "When and where will the PYS Bootcamp take place?",
-    answer: `The PYS Bootcamp takes place on ${bootcampFacts.dates} in ${bootcampFacts.city}. The exact venue and start time will be announced soon.`,
-  },
-  {
-    question: "Who can apply?",
-    answer: `Students aged ${bootcampFacts.ages}. No previous MUN experience is required.`,
-  },
-  {
-    question: "How much does the PYS Bootcamp cost?",
-    answer: `The Bootcamp fee is ${bootcampFacts.fee}, paid together with your application, and is non-refundable. The Campus Ambassador Program is free.`,
-  },
-  {
-    question: "When do applications close?",
-    answer: openOpportunities.length > 0
-      ? `Applications for ${formatTitleList(openOpportunities)} are open now, and a closing date has not been announced yet.${closedOpportunities.length > 0 ? ` The ${formatTitleList(closedOpportunities)} intakes are closed.` : ""}`
-      : "All current PYSMUN intakes are closed. New opportunities will be announced through official PYSMUN channels.",
-  },
-  {
-    question: "What will I learn at the PYS Bootcamp?",
-    answer: "You will practice rules of procedure, structured public speaking, negotiation, caucusing, resolution writing and committee strategy through guided exercises.",
-  },
-  {
     question: "Are the Delegate and Observer forms open?",
     answer: openConferenceForms.length > 0
       ? `Yes. The ${formatNameList(openConferenceForms.map((item) => conferenceFormNames[item.id as ConferenceProgram]))} ${openConferenceForms.length === 1 ? "form is" : "forms are"} open now. Directorate applications have closed for this cycle.`
@@ -209,5 +183,27 @@ export const faqs = [
   {
     question: "How much do the Delegate and Observer forms cost?",
     answer: `The Delegate fee is ${delegateFacts.earlyBirdFee} for early bird applicants through ${delegateFacts.earlyBirdEndsDisplay}, rising to ${delegateFacts.regularFee} from ${delegateFacts.regularStartsDisplay} onward. The Observer fee is a flat ${observerFacts.fee}, with no early bird pricing.`,
+  },
+  {
+    question: "Who can apply?",
+    answer: `Students aged ${delegateFacts.ages}. No previous MUN experience is required.`,
+  },
+  {
+    question: "Do I need previous MUN experience?",
+    answer: "No. First-time participants are welcome. The Delegate and Observer forms ask about previous MUN experience, but \"None\" is a perfectly good answer.",
+  },
+  {
+    question: "When do applications close?",
+    answer: openOpportunities.length > 0
+      ? `Applications for ${formatTitleList(openOpportunities)} are open now, and a closing date has not been announced yet.${closedOpportunities.length > 0 ? ` The ${formatTitleList(closedOpportunities)} intakes are closed.` : ""}`
+      : "All current PYSMUN intakes are closed. New opportunities will be announced through official PYSMUN channels.",
+  },
+  {
+    question: "When and where was the PYS Bootcamp held?",
+    answer: `The PYS Bootcamp was held on ${bootcampFacts.dates} in ${bootcampFacts.city}, with a fee of ${bootcampFacts.fee}. Future editions will be announced through official PYSMUN channels.`,
+  },
+  {
+    question: "What does the PYS Bootcamp cover?",
+    answer: "Participants practice rules of procedure, structured public speaking, negotiation, caucusing, resolution writing and committee strategy through guided exercises.",
   },
 ];

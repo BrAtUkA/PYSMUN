@@ -35,6 +35,11 @@ const allotmentConfirmed: Partial<Record<StatusResult["program"], { confirmed: s
   observer: { confirmed: "Your committee allotment is confirmed", next: "Conference details arrive by email and WhatsApp." },
 };
 
+// Last Bootcamp day ends at midnight Pakistan time (19:00 UTC, PKT is UTC+5).
+function bootcampEnded() {
+  return Date.now() >= new Date(`${bootcampFacts.endDate}T19:00:00Z`).getTime();
+}
+
 function buildStages(result: StatusResult): Stage[] {
   const review = result.reviewStatus;
   const first = result.fullName?.trim().split(/\s+/)[0];
@@ -66,7 +71,9 @@ function buildStages(result: StatusResult): Stage[] {
         label: confirmedLabel,
         description: allotment
           ? `${allotment.confirmed}${greeting}. ${allotment.next}`
-          : `Your seat is reserved${greeting}. Camp details arrive by email and WhatsApp before ${bootcampFacts.datesShort}.`,
+          : bootcampEnded()
+            ? `Your seat was confirmed${greeting}. Thank you for being part of the PYS Bootcamp.`
+            : `Your seat is reserved${greeting}. Camp details arrive by email and WhatsApp before ${bootcampFacts.datesShort}.`,
         state: "done",
       });
     } else {

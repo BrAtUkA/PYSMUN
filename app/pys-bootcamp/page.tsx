@@ -21,7 +21,7 @@ const eventSchema = {
   eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
   location: {
     "@type": "Place",
-    name: "Venue to be announced",
+    name: bootcampFacts.city,
     address: { "@type": "PostalAddress", addressLocality: bootcampFacts.city, addressCountry: "PK" },
   },
   organizer: { "@type": "Organization", name: "Pakistan Youth Summit Model United Nations", url: "https://pysmun.com" },

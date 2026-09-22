@@ -5,7 +5,7 @@ import { faqs } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Frequently Asked Questions",
-  description: "Answers about the PYS Bootcamp, previous MUN experience requirements and upcoming PYSMUN opportunities.",
+  description: "Answers about the PYSMUN Delegate and Observer forms, fees, eligibility and the PYS Bootcamp.",
 };
 
 const faqSchema = {
@@ -30,7 +30,7 @@ export default function FaqPage() {
               <p className="eyebrow">Information</p>
               <h1>Questions, <em>answered.</em></h1>
             </div>
-            <p>Everything currently confirmed about the PYS Bootcamp and upcoming PYSMUN opportunities.</p>
+            <p>Everything currently confirmed about PYSMUN, from the Delegate and Observer forms to the PYS Bootcamp.</p>
           </header>
           <FaqAccordion items={faqs} />
         </div>
