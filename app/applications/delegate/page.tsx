@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ComingSoonApplication } from "@/components/coming-soon-application";
-import { DelegateForm } from "@/components/delegate-form";
-import { currentDelegateFee, opportunities } from "@/lib/content";
+import { ConferenceForm } from "@/components/conference-form";
+import { currentDelegateFee, delegateFacts, opportunities } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Delegate Form",
@@ -17,7 +17,7 @@ export default function DelegateApplicationPage() {
         eyebrow="Conference floor"
         title="Delegate"
         description="Represent a position, negotiate global issues and collaborate toward resolutions."
-        items={["Choose individual or institutional delegation registration.", "Share committee preferences and relevant experience.", "Receive country and committee allotment after review.", "Prepare with official study guides before conference day."]}
+        items={["Share your details and committee preferences.", "Tell us which country or personality you would like to represent.", "Receive committee and country or personality allotment after review.", "Prepare with official study guides before conference day."]}
       />
     );
   }
@@ -34,11 +34,11 @@ export default function DelegateApplicationPage() {
         </div>
         <div className="form-aside__foot">
           <span className="status-pill" data-status="open">Applications open</span>
-          <p>{currentFee.label} fee &middot; {currentFee.fee}</p>
+          <p>{currentFee.label} fee &middot; {currentFee.fee}{currentFee.tier === "early-bird" && <> until {delegateFacts.earlyBirdEndsDisplay}, then {delegateFacts.regularFee}</>}</p>
         </div>
       </aside>
       <section className="form-main">
-        <DelegateForm currentFee={currentFee} />
+        <ConferenceForm program="delegate" currentFee={currentFee} />
       </section>
     </main>
   );

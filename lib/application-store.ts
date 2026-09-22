@@ -4,13 +4,16 @@ import { createHash, randomInt } from "node:crypto";
 import { mkdir, appendFile, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { ApplicationPhoto } from "./application-photo";
-import type { CampusAmbassadorApplication, DelegateApplication, DirectorateApplication, TrainingCampApplication } from "./application-schema";
-import type { DelegateFeeTier } from "./content";
+import type { CampusAmbassadorApplication, DelegateApplication, DirectorateApplication, ObserverApplication, TrainingCampApplication } from "./application-schema";
+import type { ConferenceProgram, FeeTier } from "./content";
 
-export type DelegateApplicationRecord = DelegateApplication & { feeTier: DelegateFeeTier; feeAmount: string };
+// Fee metadata is computed server-side at submission time, never taken from
+// the client, and stored alongside the applicant's answers.
+type FeeRecord = { feeTier: FeeTier; feeAmount: string };
+export type ConferenceApplicationRecord = (DelegateApplication | ObserverApplication) & FeeRecord;
 
-type ApplicationProgram = "training-camp" | "campus-ambassador" | "directorate" | "delegate";
-type ApplicationPayload = TrainingCampApplication | CampusAmbassadorApplication | DirectorateApplication | DelegateApplicationRecord;
+type ApplicationProgram = "training-camp" | "campus-ambassador" | "directorate" | ConferenceProgram;
+type ApplicationPayload = TrainingCampApplication | CampusAmbassadorApplication | DirectorateApplication | ConferenceApplicationRecord;
 
 type StoredFile = {
   path: string;
@@ -38,6 +41,7 @@ const referenceCodePrefixes: Record<ApplicationProgram, string> = {
   "campus-ambassador": "CA",
   directorate: "DR",
   delegate: "DL",
+  observer: "OB",
 };
 
 function referenceCode(program: ApplicationProgram) {
@@ -357,14 +361,14 @@ export async function saveDirectorateApplication(application: DirectorateApplica
   return { referenceCode: record.referenceCode };
 }
 
-export async function saveDelegateApplication(application: DelegateApplicationRecord, photo: ApplicationPhoto, idDocument: ApplicationPhoto, receipt: ApplicationPhoto) {
-  const record = await saveToSupabase(application, "delegate", photo, receipt, undefined, idDocument);
+export async function saveConferenceApplication(program: ConferenceProgram, application: ConferenceApplicationRecord, photo: ApplicationPhoto, idDocument: ApplicationPhoto, receipt: ApplicationPhoto) {
+  const record = await saveToSupabase(application, program, photo, receipt, undefined, idDocument);
   const webhook = process.env.APPLICATION_NOTIFICATION_WEBHOOK_URL;
   if (webhook) {
     fetch(webhook, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ event: "delegate_application.received", referenceCode: record.referenceCode }),
+      body: JSON.stringify({ event: `${program}_application.received`, referenceCode: record.referenceCode }),
     }).catch(() => undefined);
   }
   return { referenceCode: record.referenceCode };

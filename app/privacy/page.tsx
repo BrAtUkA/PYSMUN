@@ -11,7 +11,7 @@ const privacyTerms = [
   {
     number: "01",
     title: "Information We Collect",
-    content: <p>We may collect information you provide to us, including your name, CNIC or B-Form number, applicant photo, email address, WhatsApp number, institution, payment receipt and transaction reference, and other details submitted through an application or enquiry.</p>,
+    content: <p>We may collect information you provide to us, including your name, CNIC or B-Form number and a photo or scan of it, applicant photo, email address, WhatsApp and emergency contact numbers, institution, CV, payment receipt and transaction reference, and other details submitted through an application or enquiry.</p>,
   },
   {
     number: "02",

@@ -33,7 +33,8 @@ export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [footerVisible, setFooterVisible] = useState(false);
   const needsRestingSurface = pathname !== "/";
-  const usesSplitFormHeader = pathname === "/applications/pys-bootcamp" || pathname === "/applications/campus-ambassador" || pathname === "/applications/directorate" || pathname === "/applications/delegate";
+  // Every page under /applications/ is a program's form page (the hub itself is /applications).
+  const usesSplitFormHeader = pathname.startsWith("/applications/");
   const isApplicationsHub = pathname === "/applications";
   const primaryAction = usesSplitFormHeader
     ? pathname === "/applications/pys-bootcamp"

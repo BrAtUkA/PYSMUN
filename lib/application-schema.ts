@@ -89,7 +89,9 @@ export const directorateApplicationSchema = z.object({
 
 export type DirectorateApplication = z.infer<typeof directorateApplicationSchema>;
 
-export const delegateApplicationSchema = z.object({
+// Shared by the Delegate and Observer forms. Refinements are applied per
+// program below, after `omit`, since zod can't omit from a refined object.
+const conferenceApplicationFields = z.object({
   fullName: z.string().trim().min(3, "Enter your full name").max(100),
   email: z.email("Enter a valid email address").max(160).transform((value) => value.toLowerCase()),
   whatsapp: pakistaniMobile,
@@ -110,9 +112,18 @@ export const delegateApplicationSchema = z.object({
   consent: z.literal(true, { error: "Consent is required to submit" }),
   website: z.string().max(0, "Submission rejected"),
   turnstileToken: z.string().optional(),
-}).refine((data) => data.firstChoiceCommittee !== data.secondChoiceCommittee, {
-  message: "Choose two different committees",
-  path: ["secondChoiceCommittee"],
 });
 
+const distinctCommittees = {
+  check: (data: { firstChoiceCommittee: string; secondChoiceCommittee: string }) => data.firstChoiceCommittee !== data.secondChoiceCommittee,
+  params: { message: "Choose two different committees", path: ["secondChoiceCommittee"] },
+};
+
+export const delegateApplicationSchema = conferenceApplicationFields.refine(distinctCommittees.check, distinctCommittees.params);
+
+export const observerApplicationSchema = conferenceApplicationFields
+  .omit({ countryPreference: true })
+  .refine(distinctCommittees.check, distinctCommittees.params);
+
 export type DelegateApplication = z.infer<typeof delegateApplicationSchema>;
+export type ObserverApplication = z.infer<typeof observerApplicationSchema>;

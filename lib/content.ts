@@ -29,9 +29,14 @@ export const bootcampFacts = {
 // Programs whose form collects a real payment (fee slip + TRX + receipt),
 // as opposed to Campus Ambassador/Directorate which are free. Shared so the
 // admin console and status timeline don't each hardcode their own list.
-export const paidPrograms = ["training-camp", "delegate"] as const;
+export const paidPrograms = ["training-camp", "delegate", "observer"] as const;
 
-export type DelegateFeeTier = "early-bird" | "regular";
+// Delegate and Observer share one form and pipeline; Observer only drops the
+// country/personality preference and pays a single flat fee.
+export type ConferenceProgram = "delegate" | "observer";
+
+export type FeeTier = "early-bird" | "regular" | "standard";
+export type ConferenceFee = { tier: FeeTier; label: string; fee: string; feeAmount: string };
 
 export const delegateFacts = {
   earlyBirdFee: "Rs. 4,000",
@@ -46,7 +51,7 @@ export const delegateFacts = {
   ages: "15–23",
 };
 
-export function currentDelegateFee(now: Date = new Date()): { tier: DelegateFeeTier; label: string; fee: string; feeAmount: string } {
+export function currentDelegateFee(now: Date = new Date()): ConferenceFee {
   // earlyBirdDeadlineDate is a Pakistan-local calendar date (the site's only
   // audience), so the cutoff instant is midnight PKT at the start of the next
   // day, i.e. 19:00 UTC on the deadline date itself (PKT is UTC+5).
@@ -54,6 +59,25 @@ export function currentDelegateFee(now: Date = new Date()): { tier: DelegateFeeT
   return isEarlyBird
     ? { tier: "early-bird", label: "Early bird", fee: delegateFacts.earlyBirdFee, feeAmount: delegateFacts.earlyBirdFeeAmount }
     : { tier: "regular", label: "Regular", fee: delegateFacts.regularFee, feeAmount: delegateFacts.regularFeeAmount };
+}
+
+// Surfaced outside the form (homepage, hub tile, Delegate page) while early
+// bird pricing is live; undefined afterwards so it disappears on its own.
+const delegateEarlyBirdLive = currentDelegateFee().tier === "early-bird";
+export const delegateEarlyBirdNote = delegateEarlyBirdLive ? `Delegate early bird until ${delegateFacts.earlyBirdEndsDisplay}` : undefined;
+
+export const observerFacts = {
+  fee: "Rs. 6,000",
+  feeAmount: "6000",
+  ages: "15–23",
+};
+
+export function currentObserverFee(): ConferenceFee {
+  return { tier: "standard", label: "Observer", fee: observerFacts.fee, feeAmount: observerFacts.feeAmount };
+}
+
+export function currentConferenceFee(program: ConferenceProgram): ConferenceFee {
+  return program === "delegate" ? currentDelegateFee() : currentObserverFee();
 }
 
 export const opportunities = [
@@ -98,19 +122,39 @@ export const opportunities = [
     status: "open" as ApplicationStatus,
     number: "04",
     fee: currentDelegateFee().fee,
+    highlight: delegateEarlyBirdLive ? `Early bird pricing until ${delegateFacts.earlyBirdEndsDisplay}` : undefined,
+  },
+  {
+    id: "observer",
+    eyebrow: "Observer gallery",
+    title: "Observers",
+    description: "Follow the committees from inside the room and see diplomacy at work, without a position to represent.",
+    href: "/applications/observer",
+    status: "open" as ApplicationStatus,
+    number: "05",
+    fee: observerFacts.fee,
   },
 ];
 
 export const openOpportunities = opportunities.filter((item) => item.status === "open");
 export const upcomingOpportunities = opportunities.filter((item) => item.status === "coming-soon");
+export const closedOpportunities = opportunities.filter((item) => item.status === "closed");
 
-export const countWords = ["No", "One", "Two", "Three", "Four"];
+export const countWords = ["No", "One", "Two", "Three", "Four", "Five", "Six"];
+
+export function formatNameList(names: string[]) {
+  if (names.length <= 1) return names[0] ?? "";
+  return `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+}
 
 export function formatTitleList(items: { title: string }[]) {
-  const titles = items.map((item) => item.title);
-  if (titles.length <= 1) return titles[0] ?? "";
-  return `${titles.slice(0, -1).join(", ")} and ${titles[titles.length - 1]}`;
+  return formatNameList(items.map((item) => item.title));
 }
+
+// Singular names for the shared conference form ("the Delegate form"), since
+// opportunity titles are plural ("Delegates").
+export const conferenceFormNames: Record<ConferenceProgram, string> = { delegate: "Delegate", observer: "Observer" };
+const openConferenceForms = openOpportunities.filter((item) => item.id in conferenceFormNames);
 
 // Flat gold marks, no badge/avatar shape (Saim's call). `logo` is the darker
 // accent gold (#8a742c) for use on the site's light/ivory surfaces;
@@ -145,19 +189,25 @@ export const faqs = [
   {
     question: "When do applications close?",
     answer: openOpportunities.length > 0
-      ? `${formatTitleList(openOpportunities)} applications are open now, and a closing date has not been announced yet. The PYS Bootcamp, Campus Ambassador and Directorate intakes are closed.`
-      : `PYS Bootcamp applications closed on ${bootcampFacts.deadline}. Campus Ambassador and Directorate applications are also closed. No further applications are currently being accepted.`,
+      ? `Applications for ${formatTitleList(openOpportunities)} are open now, and a closing date has not been announced yet.${closedOpportunities.length > 0 ? ` The ${formatTitleList(closedOpportunities)} intakes are closed.` : ""}`
+      : "All current PYSMUN intakes are closed. New opportunities will be announced through official PYSMUN channels.",
   },
   {
     question: "What will I learn at the PYS Bootcamp?",
     answer: "You will practice rules of procedure, structured public speaking, negotiation, caucusing, resolution writing and committee strategy through guided exercises.",
   },
   {
-    question: "Are Directorate applications and the Delegate form open?",
-    answer: `Directorate applications have closed for this cycle.${openOpportunities.some((item) => item.id === "delegate") ? " The Delegate form is open now." : upcomingOpportunities.length > 0 ? ` Applications for ${formatTitleList(upcomingOpportunities)} will follow.` : ""}`,
+    question: "Are the Delegate and Observer forms open?",
+    answer: openConferenceForms.length > 0
+      ? `Yes. The ${formatNameList(openConferenceForms.map((item) => conferenceFormNames[item.id as ConferenceProgram]))} ${openConferenceForms.length === 1 ? "form is" : "forms are"} open now. Directorate applications have closed for this cycle.`
+      : "Not right now. Directorate applications have also closed for this cycle. New dates will be announced through official PYSMUN channels.",
   },
   {
-    question: "How much does the Delegate form cost?",
-    answer: `The Delegate fee is ${delegateFacts.earlyBirdFee} for early bird applicants through ${delegateFacts.earlyBirdEndsDisplay}, rising to ${delegateFacts.regularFee} from ${delegateFacts.regularStartsDisplay} onward.`,
+    question: "What is the difference between a Delegate and an Observer?",
+    answer: "Delegates represent a country or personality in committee and negotiate toward resolutions. Observers follow committee sessions from inside the room without representing a country or personality.",
+  },
+  {
+    question: "How much do the Delegate and Observer forms cost?",
+    answer: `The Delegate fee is ${delegateFacts.earlyBirdFee} for early bird applicants through ${delegateFacts.earlyBirdEndsDisplay}, rising to ${delegateFacts.regularFee} from ${delegateFacts.regularStartsDisplay} onward. The Observer fee is a flat ${observerFacts.fee}, with no early bird pricing.`,
   },
 ];

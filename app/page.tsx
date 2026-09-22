@@ -2,7 +2,7 @@ import { AnimatedCounter } from "@/components/animated-counter";
 import { CommitteeIcon } from "@/components/committee-icon";
 import { HeroLetterField } from "@/components/hero-letter-field";
 import { Reveal } from "@/components/reveal";
-import { applicationStatusLabels, committees, countWords, openOpportunities, opportunities } from "@/lib/content";
+import { applicationStatusLabels, committees, countWords, delegateEarlyBirdNote, openOpportunities, opportunities } from "@/lib/content";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import styles from "./page.module.css";
@@ -12,6 +12,7 @@ export default function Home() {
   // With exactly one intake open the hero points straight at it; with several
   // it falls back to the hub rather than picking a favourite.
   const featured = openOpportunities.length === 1 ? openOpportunities[0] : null;
+  const earlyBird = openOpportunities.some((item) => item.id === "delegate") ? delegateEarlyBirdNote : undefined;
 
   return (
     <main id="main-content">
@@ -31,7 +32,7 @@ export default function Home() {
           </div>
           <div className={styles.heroActions}>
             <Link className={styles.heroPrimaryCta} href={applicationsOpen ? (featured?.href ?? "/applications") : "/pys-bootcamp"}>
-              <span className={styles.heroCtaMeta}>{applicationsOpen ? "Applications open" : "Current application intake closed"}</span>
+              <span className={styles.heroCtaMeta}>{applicationsOpen ? (earlyBird ?? "Applications open") : "Current application intake closed"}</span>
               <strong>{applicationsOpen ? (featured ? `Apply for ${featured.title}` : "See open applications") : "Explore the PYS Bootcamp"}</strong>
               <span className={styles.heroCtaIcon}><ArrowUpRight size={18} /></span>
             </Link>
@@ -161,14 +162,14 @@ export default function Home() {
       <section className={`section section--light ${styles.opportunities}`}>
         <div className="container">
           <Reveal className={styles.sectionHead}>
-            <div><p className="eyebrow">Find your place</p><h2 className="headline">Four ways to<br /><em>enter the story.</em></h2></div>
+            <div><p className="eyebrow">Find your place</p><h2 className="headline">{countWords[opportunities.length]} ways to<br /><em>enter the story.</em></h2></div>
             <p className="lede">Every role has a different responsibility. Every role helps build the room.</p>
           </Reveal>
           <div className={styles.opportunityList}>
             {opportunities.map((item) => (
               <Reveal key={item.id}>
                 <Link className={styles.opportunity} href={item.href}>
-                  <div><span className="status-pill" data-status={item.status}>{applicationStatusLabels[item.status].long}</span><h3>{item.title}</h3></div>
+                  <div><span className="status-pill" data-status={item.status}>{applicationStatusLabels[item.status].long}</span><h3>{item.title}</h3>{"highlight" in item && item.highlight && <p className={styles.opportunityNote}>{item.highlight}</p>}</div>
                   <p>{item.description}</p>
                   <span className={styles.circleArrow}><ArrowUpRight /></span>
                 </Link>

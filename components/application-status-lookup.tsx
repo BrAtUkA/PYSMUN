@@ -8,7 +8,7 @@ import { timeAgo } from "@/lib/time";
 
 type StatusResult = {
   referenceCode: string;
-  program: "training-camp" | "campus-ambassador" | "directorate" | "delegate";
+  program: "training-camp" | "campus-ambassador" | "directorate" | "delegate" | "observer";
   fullName: string;
   submittedAt: string;
   reviewStatus: string;
@@ -26,6 +26,13 @@ const programNames: Record<StatusResult["program"], string> = {
   "campus-ambassador": "Campus Ambassador",
   directorate: "Directorate",
   delegate: "Delegate",
+  observer: "Observer",
+};
+
+// What a confirmed conference seat means, per program.
+const allotmentConfirmed: Partial<Record<StatusResult["program"], { confirmed: string; next: string }>> = {
+  delegate: { confirmed: "Your committee and country or personality allotment is confirmed", next: "Study guides and conference details arrive by email and WhatsApp." },
+  observer: { confirmed: "Your committee allotment is confirmed", next: "Conference details arrive by email and WhatsApp." },
 };
 
 function buildStages(result: StatusResult): Stage[] {
@@ -34,9 +41,9 @@ function buildStages(result: StatusResult): Stage[] {
   const greeting = first && first.length <= 20 ? `, ${first}` : "";
 
   if (paidPrograms.includes(result.program as (typeof paidPrograms)[number])) {
-    const isDelegate = result.program === "delegate";
-    const decisionLabel = isDelegate ? "Allotment decision" : "Seat decision";
-    const confirmedLabel = isDelegate ? "Committee allotment" : "Seat confirmed";
+    const allotment = allotmentConfirmed[result.program];
+    const decisionLabel = allotment ? "Allotment decision" : "Seat decision";
+    const confirmedLabel = allotment ? "Committee allotment" : "Seat confirmed";
     const payment = result.paymentStatus;
     const stages: Stage[] = [
       { label: "Application received", description: `Thanks${greeting}. Your application and payment receipt are safely in our records.`, state: "done" },
@@ -57,8 +64,8 @@ function buildStages(result: StatusResult): Stage[] {
     } else if (payment === "confirmed") {
       stages.push({
         label: confirmedLabel,
-        description: isDelegate
-          ? `Your committee and country or personality allotment is confirmed${greeting}. Study guides and conference details arrive by email and WhatsApp.`
+        description: allotment
+          ? `${allotment.confirmed}${greeting}. ${allotment.next}`
           : `Your seat is reserved${greeting}. Camp details arrive by email and WhatsApp before ${bootcampFacts.datesShort}.`,
         state: "done",
       });
@@ -111,7 +118,7 @@ export function ApplicationStatusLookup() {
 
   const lookup = async (event: FormEvent) => {
     event.preventDefault();
-    if (!/^(TC|CA|DR|DL)-\d{2}-\d{4}$/.test(referenceCode)) {
+    if (!/^(TC|CA|DR|DL|OB)-\d{2}-\d{4}$/.test(referenceCode)) {
       setMessage("Enter your Application ID, e.g. TC‑26‑1234.");
       return;
     }

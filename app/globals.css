@@ -346,7 +346,8 @@ img, svg, canvas { display: block; max-width: 100%; }
 .applications-overview__header h1 em { color: #8a742c; font-weight: 400; }
 .applications-overview__meta { padding-top: 1.2rem; border-top: 1px solid var(--line-light); }
 .applications-overview__meta > p { margin: 0 0 1rem; color: #5b6776; line-height: 1.65; }
-.application-grid--overview { flex: 1; min-height: 22rem; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 0; border-block: 1px solid var(--line-light); }
+/* One equal column per program, however many there are, on desktop. */
+.application-grid--overview { flex: 1; min-height: 22rem; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0,1fr); gap: 0; border-block: 1px solid var(--line-light); }
 .application-grid--overview .application-tile { min-height: 0; height: 100%; padding: 1.15rem; border-block: 0; border-left: 1px solid var(--line-light); border-right: 0; border-radius: 0; }
 .application-grid--overview .application-tile-shell:last-child .application-tile { border-right: 1px solid var(--line-light); }
 .application-grid--overview .application-tile h2 { font-size: clamp(2.6rem,3.2vw,4.2rem); }
@@ -355,7 +356,8 @@ img, svg, canvas { display: block; max-width: 100%; }
 @media (max-width: 1050px) {
   .applications-overview { padding-top: 6.5rem; }
   .applications-overview__header { padding-block: 2.5rem; }
-  .application-grid--overview { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .application-grid--overview { grid-auto-flow: row; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .application-grid--overview .application-tile-shell:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .application-grid--overview .application-tile { min-height: 19rem; border-bottom: 1px solid var(--line-light); }
 }
 

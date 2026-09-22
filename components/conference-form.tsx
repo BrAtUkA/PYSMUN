@@ -2,17 +2,48 @@
 
 import { ArrowLeft, ArrowRight, Check, Copy, LoaderCircle } from "lucide-react";
 import Script from "next/script";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, type ReactNode, useEffect, useRef, useState } from "react";
 import { Field, FormRail, FormSuccess, PhoneField, ReviewLedger, SelectField, StepNumeral, TextareaField } from "@/components/application-form-kit";
 import { ApplicationDocumentField } from "@/components/application-document-field";
 import { ApplicationPhotoField } from "@/components/application-photo-field";
 import { CommitteeIcon } from "@/components/committee-icon";
 import { cnicPattern, formatCnic } from "@/lib/cnic";
 import { emailPattern, formatPakistaniNationalNumber, pakistaniMobileMessage, pakistaniNationalMobilePattern } from "@/lib/contact-validation";
-import { committees, delegateFacts } from "@/lib/content";
+import { type ConferenceFee, type ConferenceProgram, committees, conferenceFormNames, delegateFacts } from "@/lib/content";
 import { paymentAccount } from "@/lib/payment";
 
-type CurrentFee = { tier: "early-bird" | "regular"; label: string; fee: string; feeAmount: string };
+// Everything that differs between the Delegate and Observer forms. Observers
+// don't represent anyone, so they skip the country/personality preference.
+const seatCopy: Record<ConferenceProgram, {
+  asksCountryPreference: boolean;
+  badge: string;
+  committeeIntro: string;
+  successTitle: ReactNode;
+  successSteps: string[];
+}> = {
+  delegate: {
+    asksCountryPreference: true,
+    badge: "delegate badge",
+    committeeIntro: "Committee and country or personality allotment follows review, based on your preferences.",
+    successTitle: <>You&rsquo;re on<br /><em>the floor.</em></>,
+    successSteps: [
+      "Your payment is verified within 24 hours",
+      "Committee and country or personality allotment is confirmed by email and WhatsApp",
+      "Study guides and conference details arrive before the event",
+    ],
+  },
+  observer: {
+    asksCountryPreference: false,
+    badge: "observer badge",
+    committeeIntro: "Choose the committees you would most like to observe. Allotment follows review, based on your preferences.",
+    successTitle: <>You&rsquo;re in<br /><em>the gallery.</em></>,
+    successSteps: [
+      "Your payment is verified within 24 hours",
+      "Your committee allotment is confirmed by email and WhatsApp",
+      "Conference details arrive before the event",
+    ],
+  },
+};
 
 type Values = {
   fullName: string; email: string; whatsapp: string; gender: string; age: string;
@@ -28,13 +59,15 @@ const initialValues: Values = {
   transactionReference: "", consent: false, website: "",
 };
 
-const stepFields: (keyof Values)[][] = [
-  ["fullName", "email", "whatsapp", "gender", "age"],
-  ["cnic", "institution", "fieldOfStudy", "gradeSemester", "emergencyContact"],
-  ["firstChoiceCommittee", "secondChoiceCommittee", "countryPreference", "previousExperience"],
-  ["transactionReference"],
-  ["consent"],
-];
+function stepFieldsFor(asksCountryPreference: boolean): (keyof Values)[][] {
+  return [
+    ["fullName", "email", "whatsapp", "gender", "age"],
+    ["cnic", "institution", "fieldOfStudy", "gradeSemester", "emergencyContact"],
+    ["firstChoiceCommittee", "secondChoiceCommittee", ...(asksCountryPreference ? ["countryPreference" as const] : []), "previousExperience"],
+    ["transactionReference"],
+    ["consent"],
+  ];
+}
 
 const stepNames = ["Identity", "Documents", "Committee", "Payment", "Declaration"];
 const lastStep = stepNames.length - 1;
@@ -108,7 +141,10 @@ function CopyableDetail({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function DelegateForm({ currentFee }: { currentFee: CurrentFee }) {
+export function ConferenceForm({ program, currentFee }: { program: ConferenceProgram; currentFee: ConferenceFee }) {
+  const seat = seatCopy[program];
+  const name = conferenceFormNames[program];
+  const stepFields = stepFieldsFor(seat.asksCountryPreference);
   const [step, setStep] = useState(0);
   const [values, setValues] = useState(initialValues);
   const [photo, setPhoto] = useState<File | null>(null);
@@ -230,9 +266,11 @@ export function DelegateForm({ currentFee }: { currentFee: CurrentFee }) {
     setMessage("");
     const token = document.querySelector<HTMLInputElement>('input[name="cf-turnstile-response"]')?.value;
     try {
+      const { countryPreference, ...sharedValues } = values;
       const submission = new FormData();
       submission.set("payload", JSON.stringify({
-        ...values,
+        ...sharedValues,
+        ...(seat.asksCountryPreference ? { countryPreference } : {}),
         whatsapp: `+92${values.whatsapp}`,
         emergencyContact: `+92${values.emergencyContact}`,
         age: Number(values.age),
@@ -241,7 +279,7 @@ export function DelegateForm({ currentFee }: { currentFee: CurrentFee }) {
       if (photo) submission.set("photo", photo);
       if (idDocument) submission.set("idDocument", idDocument);
       if (receipt) submission.set("receipt", receipt);
-      const response = await fetch("/api/applications/delegate", {
+      const response = await fetch(`/api/applications/${program}`, {
         method: "POST",
         body: submission,
       });
@@ -264,14 +302,10 @@ export function DelegateForm({ currentFee }: { currentFee: CurrentFee }) {
 
   if (status === "success") {
     return <FormSuccess
-      title={<>You&rsquo;re on<br /><em>the floor.</em></>}
-      note="Your Delegate form is with the PYSMUN team."
+      title={seat.successTitle}
+      note={`Your ${name} form is with the PYSMUN team.`}
       reference={reference}
-      steps={[
-        "Your payment is verified within 24 hours",
-        "Committee and country or personality allotment is confirmed by email and WhatsApp",
-        "Study guides and conference details arrive before the event",
-      ]}
+      steps={seat.successSteps}
     />;
   }
 
@@ -292,7 +326,7 @@ export function DelegateForm({ currentFee }: { currentFee: CurrentFee }) {
           <ApplicationPhotoField file={photo} error={errors.photo} onChange={(file) => { setPhoto(file); if (file) setPhotoError(); }} onError={setPhotoError} wide />
         </div></fieldset>}
 
-        {step === 1 && <fieldset><legend>Verify your identity.</legend><p className="form-legend-copy">Your CNIC or B-Form is used to confirm your identity and issue your delegate badge.</p><div className="field-grid">
+        {step === 1 && <fieldset><legend>Verify your identity.</legend><p className="form-legend-copy">Your CNIC or B-Form is used to confirm your identity and issue your {seat.badge}.</p><div className="field-grid">
           <Field label="CNIC / B-Form number" name="cnic" value={values.cnic} error={errors.cnic} onChange={update} transform={formatCnic} inputMode="numeric" maxLength={15} placeholder="12345-1234567-1" autoComplete="off" />
           <Field label="Institution" name="institution" value={values.institution} error={errors.institution} onChange={update} />
           <Field label="Field of study" name="fieldOfStudy" value={values.fieldOfStudy} error={errors.fieldOfStudy} onChange={update} />
@@ -301,10 +335,10 @@ export function DelegateForm({ currentFee }: { currentFee: CurrentFee }) {
           <ApplicationDocumentField file={idDocument} error={errors.idDocument} onChange={(file) => { setIdDocument(file); if (file) setIdDocumentError(); }} onError={setIdDocumentError} label="CNIC / B-Form photo" prompt="Attach a photo or scan of your CNIC or B-Form" note="JPEG, PNG, WebP or PDF, under 2 MB." requiredMessage="ID document is required" wide />
         </div></fieldset>}
 
-        {step === 2 && <fieldset><legend>Your committee preferences.</legend><p className="form-legend-copy">Committee and country or personality allotment follows review, based on your preferences.</p><div className="field-grid">
+        {step === 2 && <fieldset><legend>Your committee preferences.</legend><p className="form-legend-copy">{seat.committeeIntro}</p><div className="field-grid">
           <CommitteePicker label="1st choice of committee" name="firstChoiceCommittee" value={values.firstChoiceCommittee} otherValue={values.secondChoiceCommittee} error={errors.firstChoiceCommittee} onChange={update} />
           <CommitteePicker label="2nd choice of committee" name="secondChoiceCommittee" value={values.secondChoiceCommittee} otherValue={values.firstChoiceCommittee} error={errors.secondChoiceCommittee} onChange={update} />
-          <Field label="Country / personality preference" name="countryPreference" value={values.countryPreference} error={errors.countryPreference} onChange={update} wide />
+          {seat.asksCountryPreference && <Field label="Country / personality preference" name="countryPreference" value={values.countryPreference} error={errors.countryPreference} onChange={update} wide />}
           <TextareaField label="Previous MUN experience" name="previousExperience" value={values.previousExperience} error={errors.previousExperience} onChange={update} maxLength={700} placeholder="Write “None” if this is your first time — that’s alright." />
           <Field label="How did you hear about PYSMUN? (optional)" name="referral" value={values.referral} error={errors.referral} onChange={update} />
           <Field label="Ambassador code (optional)" name="ambassadorCode" value={values.ambassadorCode} error={errors.ambassadorCode} onChange={update} placeholder="If referred by a Campus Ambassador" />
@@ -312,7 +346,7 @@ export function DelegateForm({ currentFee }: { currentFee: CurrentFee }) {
 
         {step === 3 && <fieldset><legend>Reserve your seat.</legend><p className="form-legend-copy">Send the fee, then attach your receipt. Payments are verified within 24 hours.</p>
           <div className="payment-slip">
-            <div className="payment-slip__fee"><span>Delegate fee &middot; {currentFee.label}</span><strong>{currentFee.fee}</strong></div>
+            <div className="payment-slip__fee"><span>{name} fee{currentFee.tier !== "standard" && <> &middot; {currentFee.label}</>}</span><strong>{currentFee.fee}</strong></div>
             <div className="payment-slip__rows">
               <div><span>Bank</span><strong>{paymentAccount.bank}</strong></div>
               <div><span>Account title</span><strong>{paymentAccount.title}</strong></div>
@@ -332,8 +366,8 @@ export function DelegateForm({ currentFee }: { currentFee: CurrentFee }) {
           </div></fieldset>}
 
         {step === 4 && <fieldset><legend>Review and submit.</legend><p className="form-legend-copy">Check your information before sending it to the PYSMUN team.</p>
-          <ReviewLedger photo={photo} idDocument={idDocument} receipt={receipt} rows={[["Program", "Delegate"], ["Name", values.fullName], ["Email", values.email], ["Contact", `+92 ${formatPakistaniNationalNumber(values.whatsapp)}`], ["Gender", genderLabels[values.gender] || values.gender], ["Age", values.age], ["CNIC / B-Form", values.cnic], ["Institution", values.institution], ["Field of study", values.fieldOfStudy], ["Grade / semester", values.gradeSemester], ["Emergency contact", `+92 ${formatPakistaniNationalNumber(values.emergencyContact)}`], ["1st choice committee", committeeLabels[values.firstChoiceCommittee] || values.firstChoiceCommittee], ["2nd choice committee", committeeLabels[values.secondChoiceCommittee] || values.secondChoiceCommittee], ["Country / personality preference", values.countryPreference], ["Fee paid", currentFee.fee], ["Transaction ID", values.transactionReference]]} />
-          <label className="consent"><input type="checkbox" checked={values.consent} onChange={(event) => update("consent", event.target.checked)} /><span>I confirm this information is accurate and consent to PYSMUN securely using my details, CNIC, photo, ID document and payment information to process my Delegate form and contact me about committee allotment. I understand the fee is non-refundable.</span></label>{errors.consent && <p className="form-error">{errors.consent[0]}</p>}{siteKey && <div className="cf-turnstile" data-sitekey={siteKey} data-theme="light" />}</fieldset>}
+          <ReviewLedger photo={photo} idDocument={idDocument} receipt={receipt} rows={[["Program", name], ["Name", values.fullName], ["Email", values.email], ["Contact", `+92 ${formatPakistaniNationalNumber(values.whatsapp)}`], ["Gender", genderLabels[values.gender] || values.gender], ["Age", values.age], ["CNIC / B-Form", values.cnic], ["Institution", values.institution], ["Field of study", values.fieldOfStudy], ["Grade / semester", values.gradeSemester], ["Emergency contact", `+92 ${formatPakistaniNationalNumber(values.emergencyContact)}`], ["1st choice committee", committeeLabels[values.firstChoiceCommittee] || values.firstChoiceCommittee], ["2nd choice committee", committeeLabels[values.secondChoiceCommittee] || values.secondChoiceCommittee], ...(seat.asksCountryPreference ? [["Country / personality preference", values.countryPreference] as [string, string]] : []), ["Fee paid", currentFee.fee], ["Transaction ID", values.transactionReference]]} />
+          <label className="consent"><input type="checkbox" checked={values.consent} onChange={(event) => update("consent", event.target.checked)} /><span>I confirm this information is accurate and consent to PYSMUN securely using my details, CNIC, photo, ID document and payment information to process my {name} form and contact me about committee allotment. I understand the fee is non-refundable.</span></label>{errors.consent && <p className="form-error">{errors.consent[0]}</p>}{siteKey && <div className="cf-turnstile" data-sitekey={siteKey} data-theme="light" />}</fieldset>}
       </div>
 
       {message && <p className="form-message form-message--mobile" role="alert">{message}</p>}

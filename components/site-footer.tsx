@@ -48,6 +48,7 @@ export function SiteFooter() {
             <Link href="/applications/campus-ambassador">Campus Ambassador</Link>
             <Link href="/applications/directorate">Directorate</Link>
             <Link href="/applications/delegate">Delegates</Link>
+            <Link href="/applications/observer">Observers</Link>
           </div>
           <div>
             <p className="site-footer__label">Information</p>

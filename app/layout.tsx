@@ -20,7 +20,7 @@ import "./globals.css";
 export const revalidate = 3600;
 
 const socialDescription = openOpportunities.length > 0
-  ? `${formatTitleList(openOpportunities)} applications are open at Pakistan Youth Summit Model United Nations. Step into the room where ideas become resolutions.`
+  ? `Applications for ${formatTitleList(openOpportunities)} are open at Pakistan Youth Summit Model United Nations. Step into the room where ideas become resolutions.`
   : `Explore the PYS Bootcamp, held ${bootcampFacts.dates} in ${bootcampFacts.city}. Applications for this intake are closed. Step into the room where ideas become resolutions.`;
 
 export const metadata: Metadata = {

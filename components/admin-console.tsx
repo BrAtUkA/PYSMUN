@@ -10,7 +10,7 @@ import { timeAgo } from "@/lib/time";
 type ApplicationRow = {
   id: string;
   reference_code: string;
-  program_slug: "training-camp" | "campus-ambassador" | "directorate" | "delegate";
+  program_slug: "training-camp" | "campus-ambassador" | "directorate" | "delegate" | "observer";
   applicant_email: string;
   applicant_phone: string;
   applicant_cnic: string;
@@ -32,7 +32,10 @@ const programNames: Record<ApplicationRow["program_slug"], string> = {
   "campus-ambassador": "Campus Ambassador",
   directorate: "Directorate",
   delegate: "Delegate",
+  observer: "Observer",
 };
+
+const feeTierLabels: Record<string, string> = { "early-bird": "Early bird", regular: "Regular", standard: "Flat fee" };
 
 const committeeNameByCode: Record<string, string> = Object.fromEntries(committees.map((committee) => [committee.code, committee.name]));
 
@@ -256,7 +259,7 @@ function exportFileName(count: number, context: ExportContext) {
   const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}`;
   const slug = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const parts = ["pysmun-applications"];
-  const programSlugs: Record<string, string> = { "training-camp": "bootcamp", "campus-ambassador": "campus", directorate: "directorate", delegate: "delegate" };
+  const programSlugs: Record<string, string> = { "training-camp": "bootcamp", "campus-ambassador": "campus", directorate: "directorate", delegate: "delegate", observer: "observer" };
   if (context.programFilter !== "all") parts.push(programSlugs[context.programFilter] ?? context.programFilter);
   if (context.statusFilter !== "all") parts.push(slug(statusLabels[context.statusFilter] ?? context.statusFilter));
   if (context.paymentFilter !== "all") parts.push(slug(statusLabels[context.paymentFilter] ?? context.paymentFilter));
@@ -464,18 +467,18 @@ export function AdminConsole() {
     awaiting: rows.filter((row) => isPaidProgram(row.program_slug) && row.payment_status === "proof_submitted").length,
     confirmed: rows.filter((row) => isPaidProgram(row.program_slug) && row.payment_status === "confirmed").length,
     invalid: rows.filter((row) => isPaidProgram(row.program_slug) && row.payment_status === "invalid").length,
-    bootcamp: rows.filter((row) => row.program_slug === "training-camp").length,
-    campus: rows.filter((row) => row.program_slug === "campus-ambassador").length,
-    directorate: rows.filter((row) => row.program_slug === "directorate").length,
-    delegate: rows.filter((row) => row.program_slug === "delegate").length,
-    bootcampPending: rows.filter((row) => row.program_slug === "training-camp" && needsReview(row)).length,
-    campusPending: rows.filter((row) => row.program_slug === "campus-ambassador" && needsReview(row)).length,
-    directoratePending: rows.filter((row) => row.program_slug === "directorate" && needsReview(row)).length,
-    delegatePending: rows.filter((row) => row.program_slug === "delegate" && needsReview(row)).length,
   };
 
+  const programItems = (Object.keys(programNames) as ApplicationRow["program_slug"][]).map((program) => {
+    const programRows = rows.filter((row) => row.program_slug === program);
+    const pending = programRows.filter(needsReview).length;
+    return { key: program, label: programNames[program], count: programRows.length, note: pending ? `${pending} pending` : undefined };
+  });
+
   const directorateRows = rows.filter((row) => row.program_slug === "directorate");
-  const delegateRows = rows.filter((row) => row.program_slug === "delegate");
+  // Delegates and Observers fill in the same form, so their shared facets
+  // (gender, committee choice) are counted together.
+  const conferenceRows = rows.filter((row) => row.program_slug === "delegate" || row.program_slug === "observer");
 
   const dayKey = (value: string | Date) => {
     const date = typeof value === "string" ? new Date(value) : value;
@@ -557,13 +560,13 @@ export function AdminConsole() {
   const positionItems = enumValues(directorateRows, "preferredPosition", ["director", "assistant-director", "staff"]);
   const educationItems = enumValues(rows, "educationLevel", ["school", "college", "university", "other"]);
   const experienceItems = enumValues(rows, "experience", ["none", "one-two", "three-plus", "some", "extensive"]);
-  const genderItems = enumValues(delegateRows, "gender", ["male", "female", "other"]);
+  const genderItems = enumValues(conferenceRows, "gender", ["male", "female", "other"]);
   const committeeChoiceItems = committees
     .map((committee) => ({
       key: `firstChoiceCommittee:${committee.code}`,
       value: committee.code,
       label: committee.name,
-      count: delegateRows.filter((row) => String(row.payload.firstChoiceCommittee ?? "") === committee.code).length,
+      count: conferenceRows.filter((row) => String(row.payload.firstChoiceCommittee ?? "") === committee.code).length,
     }))
     .filter((item) => item.count > 0);
 
@@ -724,12 +727,7 @@ export function AdminConsole() {
             <StatBars
               activeKey={programFilter}
               onSelect={(item) => toggleProgram(item.key)}
-              items={[
-                { key: "training-camp", label: "PYS Bootcamp", count: stats.bootcamp, note: stats.bootcampPending ? `${stats.bootcampPending} pending` : undefined },
-                { key: "campus-ambassador", label: "Campus Ambassador", count: stats.campus, note: stats.campusPending ? `${stats.campusPending} pending` : undefined },
-                { key: "directorate", label: "Directorate", count: stats.directorate, note: stats.directoratePending ? `${stats.directoratePending} pending` : undefined },
-                { key: "delegate", label: "Delegate", count: stats.delegate, note: stats.delegatePending ? `${stats.delegatePending} pending` : undefined },
-              ]}
+              items={programItems}
             />
           </section>
 
@@ -760,8 +758,8 @@ export function AdminConsole() {
           {facetSection("Education level", "educationLevel", educationItems)}
           {facetSection("MUN experience", "experience", experienceItems)}
           {facetSection("Age", "age", ageItems)}
-          {facetSection("Delegate · gender", "gender", genderItems)}
-          {facetSection("Delegate · 1st choice committee", "firstChoiceCommittee", committeeChoiceItems)}
+          {facetSection("Delegate & Observer · gender", "gender", genderItems)}
+          {facetSection("Delegate & Observer · 1st choice committee", "firstChoiceCommittee", committeeChoiceItems)}
         </div>
       )}
 
@@ -790,7 +788,7 @@ export function AdminConsole() {
         <input
           className="admin-search"
           placeholder="Search name, email, phone, city, institution, department, committee, CNIC or Application ID"
-          title="Searches names, emails, phone numbers, cities, institutions, Directorate departments and positions, Delegate committee choices, CNICs and Application IDs"
+          title="Searches names, emails, phone numbers, cities, institutions, Directorate departments and positions, Delegate and Observer committee choices, CNICs and Application IDs"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
@@ -798,7 +796,7 @@ export function AdminConsole() {
             and both always reflect the current filters. */}
         <AdminSelect
           value={programFilter}
-          options={[["all", "All programs"], ["training-camp", "PYS Bootcamp"], ["campus-ambassador", "Campus Ambassador"], ["directorate", "Directorate"], ["delegate", "Delegate"]]}
+          options={[["all", "All programs"], ...Object.entries(programNames)]}
           onChange={setProgramFilter}
           ariaLabel="Filter by program"
         />
@@ -860,7 +858,7 @@ export function AdminConsole() {
 
               {expanded && (
                 // The third column holds the payment aside (paid programs), the
-                // CV aside (Directorate) and/or the ID document aside (Delegate);
+                // CV aside (Directorate) and/or the ID document aside (Delegate/Observer);
                 // only collapse when none of those exist.
                 <div className="admin-row__detail" data-narrow={(!isPaidProgram(row.program_slug) && !row.cv_path && !row.id_document_path) || undefined}>
                   <figure className="admin-detail__portrait">
@@ -929,7 +927,7 @@ export function AdminConsole() {
                         <div className="admin-transaction">
                           <span>Fee tier</span>
                           <div className="admin-transaction__value">
-                            <strong>{row.payload.feeTier === "early-bird" ? "Early bird" : "Regular"}{row.payload.feeAmount ? ` · Rs. ${row.payload.feeAmount}` : ""}</strong>
+                            <strong>{feeTierLabels[row.payload.feeTier] ?? row.payload.feeTier}{row.payload.feeAmount ? ` · Rs. ${row.payload.feeAmount}` : ""}</strong>
                           </div>
                         </div>
                       )}
