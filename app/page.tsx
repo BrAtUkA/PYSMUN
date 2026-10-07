@@ -2,7 +2,7 @@ import { AnimatedCounter } from "@/components/animated-counter";
 import { CommitteeIcon } from "@/components/committee-icon";
 import { HeroLetterField } from "@/components/hero-letter-field";
 import { Reveal } from "@/components/reveal";
-import { applicationStatusLabels, committees, countWords, delegateEarlyBirdNote, openOpportunities, opportunities } from "@/lib/content";
+import { applicationStatusLabels, committeeCopy, committeeSummary, committees, countWords, delegateEarlyBirdNote, openOpportunities, opportunities } from "@/lib/content";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import styles from "./page.module.css";
@@ -184,11 +184,11 @@ export default function Home() {
           <Reveal className={styles.committeeHead}>
             <div>
               <p className="eyebrow">Committee index</p>
-              <h2>Five rooms.<br /><em>Four revealed.</em></h2>
+              <h2>{committeeSummary.rooms}<br /><em>{committeeSummary.revealedLine}</em></h2>
             </div>
             <div className={styles.committeeIntro}>
               <span>Choose the question you want to carry.</span>
-              <p>Policy, human rights, crisis response, gender equality and one fictional world still waiting to be revealed.</p>
+              <p>{committeeCopy.homeIntro}</p>
             </div>
           </Reveal>
           <div className={styles.committeeIndex}>
@@ -196,14 +196,14 @@ export default function Home() {
               <Reveal className={`${styles.committeeEntry}${committee.sealed ? ` ${styles.committeeEntrySealed}` : ""}`} tapFeedback key={committee.code}>
                 <CommitteeIcon committee={committee} onDark className={`${styles.committeeMark} committee-icon--card`} />
                 <p>{committee.tone}</p>
-                <strong>{committee.code}</strong>
+                <strong>{committee.short}</strong>
                 <h3>{committee.name}</h3>
               </Reveal>
             ))}
           </div>
           <Reveal className={styles.committeeCta}>
             <Link className={styles.committeeCtaLink} href="/committees" data-tap-feedback>
-              <span>Explore all five committees</span>
+              <span>Explore all {countWords[committees.length].toLowerCase()} committees</span>
               <strong>Find your room.</strong>
               <i><ArrowUpRight size={24} /></i>
             </Link>

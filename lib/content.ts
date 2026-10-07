@@ -161,13 +161,43 @@ const openConferenceForms = openOpportunities.filter((item) => item.id in confer
 // `logoOnDark` is the same mark in the lighter --gold (#d8c88a) for the
 // homepage's dark committee index, matching how the rest of the site
 // already swaps between those two gold tones by background.
+//
+// `code` is the stable key saved with every Delegate/Observer form, so it must
+// never change once applicants may have picked it. `short` is the label shown
+// on the site and is free to change (the fifth committee kept its original
+// "Reveal" code after being revealed as the FIFA Executive Council).
 export const committees = [
-  { code: "PNA", name: "Pakistan National Assembly", tone: "National policy", index: "01", sealed: false, logo: "/committees/pna.png", logoOnDark: "/committees/pna-on-dark.png" },
-  { code: "CRISIS", name: "Continuous Crisis Committee", tone: "Decisions in motion", index: "02", sealed: false, logo: "/committees/crisis.png", logoOnDark: "/committees/crisis-on-dark.png" },
-  { code: "UNHRC", name: "United Nations Human Rights Council", tone: "Human dignity", index: "03", sealed: false, logo: "/committees/unhrc.png", logoOnDark: "/committees/unhrc-on-dark.png" },
-  { code: "UN WOMEN", name: "UN Women", tone: "Gender equality", index: "04", sealed: false, logo: "/committees/un-women.png", logoOnDark: "/committees/un-women-on-dark.png" },
-  { code: "Reveal", name: "Fictional committee", tone: "Identity withheld", index: "05", sealed: true, logo: null, logoOnDark: null },
+  { code: "PNA", short: "PNA", name: "Pakistan National Assembly", tone: "National policy", index: "01", sealed: false, logo: "/committees/pna.png", logoOnDark: "/committees/pna-on-dark.png" },
+  { code: "CRISIS", short: "CRISIS", name: "Continuous Crisis Committee", tone: "Decisions in motion", index: "02", sealed: false, logo: "/committees/crisis.png", logoOnDark: "/committees/crisis-on-dark.png" },
+  { code: "UNHRC", short: "UNHRC", name: "United Nations Human Rights Council", tone: "Human dignity", index: "03", sealed: false, logo: "/committees/unhrc.png", logoOnDark: "/committees/unhrc-on-dark.png" },
+  { code: "UN WOMEN", short: "UN WOMEN", name: "UN Women", tone: "Gender equality", index: "04", sealed: false, logo: "/committees/un-women.png", logoOnDark: "/committees/un-women-on-dark.png" },
+  { code: "Reveal", short: "FIFA", name: "Fifa Executive Council", tone: "Global sport", index: "05", sealed: false, logo: "/committees/fifa.png", logoOnDark: "/committees/fifa-on-dark.png" },
 ];
+
+// Counts and the "N rooms, M revealed" wording are derived so they can't drift
+// from the list above, including if a committee is ever sealed again.
+const committeesRevealed = committees.filter((committee) => !committee.sealed).length;
+export const committeeSummary = {
+  total: committees.length,
+  revealed: committeesRevealed,
+  allRevealed: committeesRevealed === committees.length,
+  rooms: `${countWords[committees.length]} rooms.`,
+  revealedLine: committeesRevealed === committees.length ? "All revealed." : `${countWords[committeesRevealed]} revealed.`,
+};
+
+export const committeeCopy = committeeSummary.allRevealed
+  ? {
+      metaDescription: `Explore PYSMUN's ${countWords[committees.length].toLowerCase()} Model United Nations committees, from national policy and human rights to crisis response, gender equality and the Fifa Executive Council.`,
+      lede: "From national policy and human rights to crisis response, gender equality and global sport.",
+      footnote: "Agendas and dais announcements will follow.",
+      homeIntro: "Policy, human rights, crisis response, gender equality and global sport, all five rooms now revealed.",
+    }
+  : {
+      metaDescription: `Explore PYSMUN's ${countWords[committees.length].toLowerCase()} Model United Nations committees, with ${countWords[committeesRevealed].toLowerCase()} revealed so far and the rest still under wraps.`,
+      lede: "From national policy and human rights to gender equality and crisis response, with the rest still under wraps.",
+      footnote: "Final reveals, agendas and dais announcements will follow.",
+      homeIntro: "Policy, human rights, crisis response, gender equality and more still waiting to be revealed.",
+    };
 
 export const faqs = [
   {
