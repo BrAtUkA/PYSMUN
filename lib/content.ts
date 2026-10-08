@@ -45,9 +45,9 @@ export const delegateFacts = {
   regularFeeAmount: "5000",
   // Early bird pricing is valid through the end of this date in Pakistan
   // time. Display copy derived from this: earlyBirdEndsDisplay/regularStartsDisplay.
-  earlyBirdDeadlineDate: "2026-10-07",
-  earlyBirdEndsDisplay: "October 7",
-  regularStartsDisplay: "October 8",
+  earlyBirdDeadlineDate: "2026-10-20",
+  earlyBirdEndsDisplay: "October 20",
+  regularStartsDisplay: "October 21",
   ages: "15–23",
 };
 
