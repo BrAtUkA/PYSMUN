@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { parseApplicationSubmission } from "@/lib/application-photo";
 import { directorateApplicationSchema } from "@/lib/application-schema";
 import { saveDirectorateApplication } from "@/lib/application-store";
-import { opportunities } from "@/lib/content";
+import { directorateDirectIntakeOpen, opportunities } from "@/lib/content";
 
 export const runtime = "nodejs";
 // Turnstile verify + dup checks + two file uploads to Supabase can add up on
@@ -39,7 +39,7 @@ async function verifyTurnstile(token?: string) {
 }
 
 export async function POST(request: Request) {
-  const applicationsOpen = opportunities.some((item) => item.id === "directorate" && item.status === "open");
+  const applicationsOpen = directorateDirectIntakeOpen || opportunities.some((item) => item.id === "directorate" && item.status === "open");
   if (!applicationsOpen) {
     return NextResponse.json({ message: "Directorate applications are closed." }, { status: 410 });
   }

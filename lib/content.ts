@@ -80,6 +80,10 @@ export function currentConferenceFee(program: ConferenceProgram): ConferenceFee 
   return program === "delegate" ? currentDelegateFee() : currentObserverFee();
 }
 
+// Direct intake toggle: allows approved candidates to submit through
+// /applications/directorate via direct link while public intakes remain closed.
+export const directorateDirectIntakeOpen = true;
+
 export const opportunities = [
   {
     id: "pys-bootcamp",
@@ -110,6 +114,7 @@ export const opportunities = [
     href: "/applications/directorate",
     status: "closed" as ApplicationStatus,
     number: "03",
+    highlight: directorateDirectIntakeOpen ? "Direct submission for approved candidates only" : undefined,
     // Deliberately no fee field: Directorate says nothing about payment,
     // because selected candidates may be asked to contribute after interview.
   },

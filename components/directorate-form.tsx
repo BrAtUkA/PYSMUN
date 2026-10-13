@@ -247,7 +247,7 @@ export function DirectorateForm() {
 
       <div className="form-step" key={step}>
         <StepNumeral step={step} />
-        {step === 0 && <fieldset><legend>Let&rsquo;s start with you.</legend><p className="form-legend-copy">Use contact details you check regularly. We will use them for application updates.</p><div className="field-grid">
+        {step === 0 && <fieldset><legend>Let&rsquo;s start with you.</legend><p className="form-legend-copy">This form is currently open only for approved candidates directed by the PYSMUN team to submit their details. Use contact details you check regularly. We will use them for application updates.</p><div className="field-grid">
           <Field label="Full name" name="fullName" value={values.fullName} error={errors.fullName} onChange={update} autoComplete="name" />
           <Field label="CNIC / B-Form number" name="cnic" value={values.cnic} error={errors.cnic} onChange={update} transform={formatCnic} inputMode="numeric" maxLength={15} placeholder="12345-1234567-1" autoComplete="off" />
           <Field label="Email address" name="email" type="email" value={values.email} error={errors.email} onChange={update} autoComplete="email" />

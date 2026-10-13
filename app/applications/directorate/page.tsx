@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
 import { ComingSoonApplication } from "@/components/coming-soon-application";
 import { DirectorateForm } from "@/components/directorate-form";
-import { opportunities } from "@/lib/content";
+import { directorateDirectIntakeOpen, opportunities } from "@/lib/content";
 
 export const metadata: Metadata = {
-  title: "Directorate Applications Closed",
-  description: "Directorate applications for the current PYSMUN intake are closed.",
+  title: "Directorate Form",
+  description: "Directorate submission form for approved PYSMUN candidates.",
 };
 
 export default function DirectorateApplicationPage() {
   const opportunity = opportunities.find((item) => item.id === "directorate");
+  const isOpen = directorateDirectIntakeOpen || opportunity?.status === "open";
 
-  if (opportunity?.status !== "open") {
+  if (!isOpen) {
     return (
       <ComingSoonApplication
         eyebrow="Leadership team"
@@ -33,7 +34,7 @@ export default function DirectorateApplicationPage() {
           <p>Directors, assistant directors and staff design, coordinate and deliver the PYSMUN experience. Shortlisted applicants are invited to a short interview.</p>
         </div>
         <div className="form-aside__foot">
-          <span className="status-pill" data-status="open">Applications open</span>
+          <span className="status-pill" data-status="open">Approved candidates</span>
           <p>Registrations · Logistics · Hospitality · Media · Decor · Security · Delegate Affairs</p>
         </div>
       </aside>
