@@ -8,7 +8,7 @@ import { timeAgo } from "@/lib/time";
 
 type StatusResult = {
   referenceCode: string;
-  program: "training-camp" | "campus-ambassador" | "directorate" | "delegate" | "observer";
+  program: "training-camp" | "campus-ambassador" | "directorate" | "delegate" | "observer" | "acd";
   fullName: string;
   submittedAt: string;
   reviewStatus: string;
@@ -27,6 +27,7 @@ const programNames: Record<StatusResult["program"], string> = {
   directorate: "Directorate",
   delegate: "Delegate",
   observer: "Observer",
+  acd: "Assistant Committee Director",
 };
 
 // What a confirmed conference seat means, per program.
@@ -82,9 +83,9 @@ function buildStages(result: StatusResult): Stage[] {
     return stages;
   }
 
-  // Directorate runs an interview between review and the final decision, so
-  // that stage is shown on its timeline from the start.
-  const usesInterview = result.program === "directorate";
+  // Directorate and ACD run an interview between review and the final decision, so
+  // that stage is shown on their timeline from the start.
+  const usesInterview = result.program === "directorate" || result.program === "acd";
 
   const stages: Stage[] = [
     { label: "Application received", description: `Thanks${greeting}. Your application is safely in our records.`, state: "done" },

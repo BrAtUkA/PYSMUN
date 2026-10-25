@@ -63,7 +63,7 @@ async function readImageField(form: FormData, field: string, label: string, kind
   return { ok: true, image: { data, contentType, extension: allowedTypes[contentType as keyof typeof allowedTypes], size: file.size } };
 }
 
-export async function parseApplicationSubmission(request: Request, options?: { withReceipt?: boolean; withCv?: boolean; withIdDocument?: boolean }): Promise<ParsedApplicationSubmission> {
+export async function parseApplicationSubmission(request: Request, options?: { withReceipt?: boolean; withCv?: boolean; withIdDocument?: boolean; cvLabel?: string; idDocumentLabel?: string }): Promise<ParsedApplicationSubmission> {
   let form: FormData;
   try {
     form = await request.formData();
@@ -95,14 +95,14 @@ export async function parseApplicationSubmission(request: Request, options?: { w
 
   let cv: ApplicationPhoto | undefined;
   if (options?.withCv) {
-    const cvResult = await readImageField(form, "cv", "CV", "document");
+    const cvResult = await readImageField(form, "cv", options.cvLabel ?? "CV", "document");
     if (!cvResult.ok) return cvResult;
     cv = cvResult.image;
   }
 
   let idDocument: ApplicationPhoto | undefined;
   if (options?.withIdDocument) {
-    const idDocumentResult = await readImageField(form, "idDocument", "ID document", "document");
+    const idDocumentResult = await readImageField(form, "idDocument", options.idDocumentLabel ?? "ID document", "document");
     if (!idDocumentResult.ok) return idDocumentResult;
     idDocument = idDocumentResult.image;
   }

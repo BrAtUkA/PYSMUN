@@ -4,7 +4,7 @@ import { createHash, randomInt } from "node:crypto";
 import { mkdir, appendFile, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { ApplicationPhoto } from "./application-photo";
-import type { CampusAmbassadorApplication, DelegateApplication, DirectorateApplication, ObserverApplication, TrainingCampApplication } from "./application-schema";
+import type { AcdApplication, CampusAmbassadorApplication, DelegateApplication, DirectorateApplication, ObserverApplication, TrainingCampApplication } from "./application-schema";
 import type { ConferenceProgram, FeeTier } from "./content";
 
 // Fee metadata is computed server-side at submission time, never taken from
@@ -12,8 +12,8 @@ import type { ConferenceProgram, FeeTier } from "./content";
 type FeeRecord = { feeTier: FeeTier; feeAmount: string };
 export type ConferenceApplicationRecord = (DelegateApplication | ObserverApplication) & FeeRecord;
 
-type ApplicationProgram = "training-camp" | "campus-ambassador" | "directorate" | ConferenceProgram;
-type ApplicationPayload = TrainingCampApplication | CampusAmbassadorApplication | DirectorateApplication | ConferenceApplicationRecord;
+type ApplicationProgram = "training-camp" | "campus-ambassador" | "directorate" | "acd" | ConferenceProgram;
+type ApplicationPayload = TrainingCampApplication | CampusAmbassadorApplication | DirectorateApplication | AcdApplication | ConferenceApplicationRecord;
 
 type StoredFile = {
   path: string;
@@ -42,6 +42,7 @@ const referenceCodePrefixes: Record<ApplicationProgram, string> = {
   directorate: "DR",
   delegate: "DL",
   observer: "OB",
+  acd: "AC",
 };
 
 function referenceCode(program: ApplicationProgram) {
@@ -356,6 +357,19 @@ export async function saveDirectorateApplication(application: DirectorateApplica
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ event: "directorate_application.received", referenceCode: record.referenceCode }),
+    }).catch(() => undefined);
+  }
+  return { referenceCode: record.referenceCode };
+}
+
+export async function saveAcdApplication(application: AcdApplication, photo: ApplicationPhoto, cv: ApplicationPhoto, awardsProof: ApplicationPhoto) {
+  const record = await saveToSupabase(application, "acd", photo, undefined, cv, awardsProof);
+  const webhook = process.env.APPLICATION_NOTIFICATION_WEBHOOK_URL;
+  if (webhook) {
+    fetch(webhook, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ event: "acd_application.received", referenceCode: record.referenceCode }),
     }).catch(() => undefined);
   }
   return { referenceCode: record.referenceCode };

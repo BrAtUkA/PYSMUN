@@ -10,7 +10,7 @@ import { timeAgo } from "@/lib/time";
 type ApplicationRow = {
   id: string;
   reference_code: string;
-  program_slug: "training-camp" | "campus-ambassador" | "directorate" | "delegate" | "observer";
+  program_slug: "training-camp" | "campus-ambassador" | "directorate" | "delegate" | "observer" | "acd";
   applicant_email: string;
   applicant_phone: string;
   applicant_cnic: string;
@@ -33,6 +33,7 @@ const programNames: Record<ApplicationRow["program_slug"], string> = {
   directorate: "Directorate",
   delegate: "Delegate",
   observer: "Observer",
+  acd: "Assistant Committee Director",
 };
 
 const feeTierLabels: Record<string, string> = { "early-bird": "Early bird", regular: "Regular", standard: "Flat fee" };
@@ -67,8 +68,12 @@ const fieldLabelOverrides: Record<string, string> = {
   ambassadorCode: "Ambassador code",
   availabilityCity: "Available in city",
   availabilityMeetings: "Attends meetings",
+  awards: "Awards and honors",
   campusRole: "Campus role",
   countryPreference: "Country / personality preference",
+  daisExperience: "Dais experience",
+  delegateExperience: "Delegate experience",
+  delegationsCount: "Delegations to bring",
   educationLevel: "Education",
   emergencyContact: "Emergency contact",
   fieldOfStudy: "Field of study",
@@ -95,6 +100,7 @@ function fieldLabel(key: string) {
 // reading order instead; anything unlisted falls to the end.
 const detailFieldOrder = [
   "age", "gender", "city", "institution", "fieldOfStudy", "educationLevel", "gradeSemester", "campusRole", "experience",
+  "delegationsCount", "delegateExperience", "daisExperience", "awards",
   "preferredDepartment", "preferredPosition", "availabilityCity", "availabilityMeetings",
   "firstChoiceCommittee", "secondChoiceCommittee", "countryPreference",
   "emergencyContact", "alternatePhone", "socialProfile", "instagramLink", "referral", "ambassadorCode",
@@ -104,7 +110,7 @@ const detailFieldOrder = [
 const csvSkippedPayloadKeys = ["email", "whatsapp", "cnic", "consent", "website", "turnstileToken", "transactionReference"];
 
 const detailSkippedKeys = ["fullName", "email", "whatsapp", "cnic", "consent", "website", "turnstileToken", "transactionReference", "feeTier", "feeAmount"];
-const longTextKeys = ["motivation", "outreachPlan", "requirements", "previousExperience", "uniqueValue"];
+const longTextKeys = ["motivation", "outreachPlan", "requirements", "previousExperience", "uniqueValue", "delegateExperience", "daisExperience", "awards"];
 
 const payloadValueLabels: Record<string, string> = {
   none: "None",
@@ -259,7 +265,7 @@ function exportFileName(count: number, context: ExportContext) {
   const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}`;
   const slug = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const parts = ["pysmun-applications"];
-  const programSlugs: Record<string, string> = { "training-camp": "bootcamp", "campus-ambassador": "campus", directorate: "directorate", delegate: "delegate", observer: "observer" };
+  const programSlugs: Record<string, string> = { "training-camp": "bootcamp", "campus-ambassador": "campus", directorate: "directorate", delegate: "delegate", observer: "observer", acd: "acd" };
   if (context.programFilter !== "all") parts.push(programSlugs[context.programFilter] ?? context.programFilter);
   if (context.statusFilter !== "all") parts.push(slug(statusLabels[context.statusFilter] ?? context.statusFilter));
   if (context.paymentFilter !== "all") parts.push(slug(statusLabels[context.paymentFilter] ?? context.paymentFilter));
@@ -951,14 +957,14 @@ export function AdminConsole() {
 
                   {row.cv_path && (
                     <aside className="admin-detail__payment">
-                      <p className="admin-detail__payment-title">CV / resume</p>
+                      <p className="admin-detail__payment-title">{row.program_slug === "acd" ? "Resume" : "CV / resume"}</p>
                       <figure>
                         {fileUrls[row.cv_path]
                           ? row.cv_mime_type === "application/pdf"
-                            ? <a className="admin-media-open" href={fileUrls[row.cv_path]} target="_blank" rel="noreferrer" aria-label="Open CV in a new tab"><FileText aria-hidden="true" /></a>
-                            : <button type="button" className="admin-media-open" onClick={() => setLightbox({ url: fileUrls[row.cv_path!], title: `CV · ${row.reference_code}` })} aria-label="View CV full size">
+                            ? <a className="admin-media-open" href={fileUrls[row.cv_path]} target="_blank" rel="noreferrer" aria-label={`Open ${row.program_slug === "acd" ? "resume" : "CV"} in a new tab`}><FileText aria-hidden="true" /></a>
+                            : <button type="button" className="admin-media-open" onClick={() => setLightbox({ url: fileUrls[row.cv_path!], title: `${row.program_slug === "acd" ? "Resume" : "CV"} · ${row.reference_code}` })} aria-label={`View ${row.program_slug === "acd" ? "resume" : "CV"} full size`}>
                                 {/* eslint-disable-next-line @next/next/no-img-element -- short-lived signed URL */}
-                                <img src={fileUrls[row.cv_path]} alt={`CV for ${row.reference_code}`} />
+                                <img src={fileUrls[row.cv_path]} alt={`${row.program_slug === "acd" ? "Resume" : "CV"} for ${row.reference_code}`} />
                               </button>
                           : <span className="admin-media-loading"><LoaderCircle className="spin" aria-hidden="true" /></span>}
                       </figure>
@@ -967,14 +973,14 @@ export function AdminConsole() {
 
                   {row.id_document_path && (
                     <aside className="admin-detail__payment">
-                      <p className="admin-detail__payment-title">CNIC / B-Form document</p>
+                      <p className="admin-detail__payment-title">{row.program_slug === "acd" ? "Awards proof" : "CNIC / B-Form document"}</p>
                       <figure>
                         {fileUrls[row.id_document_path]
                           ? row.id_document_mime_type === "application/pdf"
-                            ? <a className="admin-media-open" href={fileUrls[row.id_document_path]} target="_blank" rel="noreferrer" aria-label="Open ID document in a new tab"><FileText aria-hidden="true" /></a>
-                            : <button type="button" className="admin-media-open" onClick={() => setLightbox({ url: fileUrls[row.id_document_path!], title: `ID document · ${row.reference_code}` })} aria-label="View ID document full size">
+                            ? <a className="admin-media-open" href={fileUrls[row.id_document_path]} target="_blank" rel="noreferrer" aria-label={`Open ${row.program_slug === "acd" ? "awards proof" : "ID document"} in a new tab`}><FileText aria-hidden="true" /></a>
+                            : <button type="button" className="admin-media-open" onClick={() => setLightbox({ url: fileUrls[row.id_document_path!], title: `${row.program_slug === "acd" ? "Awards proof" : "ID document"} · ${row.reference_code}` })} aria-label={`View ${row.program_slug === "acd" ? "awards proof" : "ID document"} full size`}>
                                 {/* eslint-disable-next-line @next/next/no-img-element -- short-lived signed URL */}
-                                <img src={fileUrls[row.id_document_path]} alt={`ID document for ${row.reference_code}`} />
+                                <img src={fileUrls[row.id_document_path]} alt={`${row.program_slug === "acd" ? "Awards proof" : "ID document"} for ${row.reference_code}`} />
                               </button>
                           : <span className="admin-media-loading"><LoaderCircle className="spin" aria-hidden="true" /></span>}
                       </figure>

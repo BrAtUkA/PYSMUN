@@ -127,3 +127,20 @@ export const observerApplicationSchema = conferenceApplicationFields
 
 export type DelegateApplication = z.infer<typeof delegateApplicationSchema>;
 export type ObserverApplication = z.infer<typeof observerApplicationSchema>;
+
+export const acdApplicationSchema = z.object({
+  fullName: z.string().trim().min(3, "Enter your full name").max(100),
+  institution: z.string().trim().min(2, "Enter your institution").max(160),
+  email: z.email("Enter a valid email address").max(160).transform((value) => value.toLowerCase()),
+  whatsapp: pakistaniMobile,
+  cnic: z.string().trim().regex(cnicPattern, "Enter a valid CNIC or B-Form number in 12345-1234567-1 format"),
+  delegateExperience: z.string().trim().min(5, "Share your experience as a delegate").max(1200),
+  daisExperience: z.string().trim().min(4, "Share your experience as a Dais member, or write None").max(1200),
+  delegationsCount: z.string().trim().min(1, "Please specify how many delegations you can bring").max(120),
+  awards: z.string().trim().min(3, "List your awards or write None").max(1000),
+  consent: z.literal(true, { error: "Consent is required to submit" }),
+  website: z.string().max(0, "Submission rejected"),
+  turnstileToken: z.string().optional(),
+});
+
+export type AcdApplication = z.infer<typeof acdApplicationSchema>;

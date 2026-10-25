@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     : "All current PYSMUN intakes are closed. New opportunities will be announced soon.",
 };
 
-const applicationOrder = ["pys-bootcamp", "campus-ambassador", "directorate", "delegate", "observer"];
+const applicationOrder = ["pys-bootcamp", "campus-ambassador", "directorate", "delegate", "observer", "acd"];
 const orderedOpportunities = applicationOrder.map((id) => opportunities.find((item) => item.id === id)!);
 
 export default function ApplicationsPage() {

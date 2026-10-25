@@ -49,6 +49,7 @@ export function SiteFooter() {
             <Link href="/applications/directorate">Directorate</Link>
             <Link href="/applications/delegate">Delegates</Link>
             <Link href="/applications/observer">Observers</Link>
+            <Link href="/applications/acd">Assistant Committee Directors</Link>
           </div>
           <div>
             <p className="site-footer__label">Information</p>

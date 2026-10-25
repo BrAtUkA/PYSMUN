@@ -220,7 +220,23 @@ export function TextareaField<N extends string>({ label, name, value, onChange, 
   );
 }
 
-export function ReviewLedger({ rows, photo, receipt, cv, idDocument }: { rows: [string, string][]; photo: File | null; receipt?: File | null; cv?: File | null; idDocument?: File | null }) {
+export function ReviewLedger({
+  rows,
+  photo,
+  receipt,
+  cv,
+  idDocument,
+  idDocumentLabel = "ID document",
+  cvLabel = "CV",
+}: {
+  rows: [string, string][];
+  photo: File | null;
+  receipt?: File | null;
+  cv?: File | null;
+  idDocument?: File | null;
+  idDocumentLabel?: string;
+  cvLabel?: string;
+}) {
   const [preview, setPreview] = useState<{ url: string; title: string } | null>(null);
 
   useEffect(() => {
@@ -236,9 +252,9 @@ export function ReviewLedger({ rows, photo, receipt, cv, idDocument }: { rows: [
         <div key={label}><span>{label}</span><strong>{value || "—"}</strong></div>
       ))}
       <div className="review-ledger__photo"><span>Photo</span><PhotoThumb file={photo} onView={(url) => setPreview({ url, title: "Applicant photo" })} /></div>
-      {idDocument !== undefined && <div className="review-ledger__photo"><span>ID document</span><DocumentThumb file={idDocument} onView={(url) => setPreview({ url, title: "ID document" })} /></div>}
+      {idDocument !== undefined && <div className="review-ledger__photo"><span>{idDocumentLabel}</span><DocumentThumb file={idDocument} onView={(url) => setPreview({ url, title: idDocumentLabel })} /></div>}
       {receipt !== undefined && <div className="review-ledger__photo"><span>Receipt</span><PhotoThumb file={receipt} onView={(url) => setPreview({ url, title: "Payment receipt" })} /></div>}
-      {cv !== undefined && <div className="review-ledger__photo"><span>CV</span><DocumentThumb file={cv} onView={(url) => setPreview({ url, title: "CV" })} /></div>}
+      {cv !== undefined && <div className="review-ledger__photo"><span>{cvLabel}</span><DocumentThumb file={cv} onView={(url) => setPreview({ url, title: cvLabel })} /></div>}
 
       {preview && createPortal(
         <div className="lightbox" role="dialog" aria-modal="true" aria-label={preview.title} onClick={() => setPreview(null)}>

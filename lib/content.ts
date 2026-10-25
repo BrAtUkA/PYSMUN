@@ -139,13 +139,23 @@ export const opportunities = [
     number: "05",
     fee: observerFacts.fee,
   },
+  {
+    id: "acd",
+    eyebrow: "Dais leadership",
+    title: "Assistant Committee Directors",
+    description: "Guide committee debate, enforce procedural integrity and evaluate delegates from the dais.",
+    href: "/applications/acd",
+    status: "open" as ApplicationStatus,
+    number: "06",
+    fee: "Free",
+  },
 ];
 
 export const openOpportunities = opportunities.filter((item) => item.status === "open");
 export const upcomingOpportunities = opportunities.filter((item) => item.status === "coming-soon");
 export const closedOpportunities = opportunities.filter((item) => item.status === "closed");
 
-export const countWords = ["No", "One", "Two", "Three", "Four", "Five", "Six"];
+export const countWords = ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight"];
 
 export function formatNameList(names: string[]) {
   if (names.length <= 1) return names[0] ?? "";
@@ -216,12 +226,16 @@ export const faqs = [
     answer: "Delegates represent a country or personality in committee and negotiate toward resolutions. Observers follow committee sessions from inside the room without representing a country or personality.",
   },
   {
+    question: "What does an Assistant Committee Director (ACD) do?",
+    answer: "Assistant Committee Directors serve on the Dais alongside the Committee Director to guide debate, ensure procedural flow and evaluate delegates. Applications are open to students with delegate or dais experience; submit your resume and awards proof through the ACD form.",
+  },
+  {
     question: "How much do the Delegate and Observer forms cost?",
     answer: `The Delegate fee is ${delegateFacts.earlyBirdFee} for early bird applicants through ${delegateFacts.earlyBirdEndsDisplay}, rising to ${delegateFacts.regularFee} from ${delegateFacts.regularStartsDisplay} onward. The Observer fee is a flat ${observerFacts.fee}, with no early bird pricing.`,
   },
   {
     question: "Who can apply?",
-    answer: `Students aged ${delegateFacts.ages}. No previous MUN experience is required.`,
+    answer: `Students aged ${delegateFacts.ages}. Delegates and Observers do not need previous MUN experience; Dais positions like Assistant Committee Director look for demonstrated delegate or dais background.`,
   },
   {
     question: "Do I need previous MUN experience?",
