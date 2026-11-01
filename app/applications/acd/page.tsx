@@ -4,17 +4,17 @@ import { AcdForm } from "@/components/acd-form";
 import { opportunities } from "@/lib/content";
 
 export const metadata: Metadata = {
-  title: "Assistant Committee Director Form",
-  description: "Apply for the Dais at PYSMUN. Lead debate, guide procedure and shape the committee experience as an Assistant Committee Director.",
+  title: "Assistant Committee Director Applications Closed",
+  description: "Applications for Assistant Committee Directors at PYSMUN are closed for this intake.",
   openGraph: {
-    title: "Assistant Committee Director Form · PYSMUN",
-    description: "Apply for the Dais at PYSMUN. Lead debate, guide procedure and shape the committee experience as an Assistant Committee Director.",
+    title: "Assistant Committee Director Applications Closed · PYSMUN",
+    description: "Applications for Assistant Committee Directors at PYSMUN are closed for this intake.",
     url: "https://pysmun.com/applications/acd",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Assistant Committee Director Form · PYSMUN",
-    description: "Apply for the Dais at PYSMUN. Lead debate, guide procedure and shape the committee experience as an Assistant Committee Director.",
+    title: "Assistant Committee Director Applications Closed · PYSMUN",
+    description: "Applications for Assistant Committee Directors at PYSMUN are closed for this intake.",
   },
 };
 

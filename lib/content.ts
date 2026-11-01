@@ -145,7 +145,7 @@ export const opportunities = [
     title: "Assistant Committee Directors",
     description: "Guide committee debate, enforce procedural integrity and evaluate delegates from the dais.",
     href: "/applications/acd",
-    status: "open" as ApplicationStatus,
+    status: "closed" as ApplicationStatus,
     number: "06",
     fee: "Free",
   },
@@ -227,7 +227,7 @@ export const faqs = [
   },
   {
     question: "What does an Assistant Committee Director (ACD) do?",
-    answer: "Assistant Committee Directors serve on the Dais alongside the Committee Director to guide debate, ensure procedural flow and evaluate delegates. Applications are open to students with delegate or dais experience; submit your resume and awards proof through the ACD form.",
+    answer: "Assistant Committee Directors serve on the Dais alongside the Committee Director to guide debate, ensure procedural flow and evaluate delegates. Applications for this intake are closed.",
   },
   {
     question: "How much do the Delegate and Observer forms cost?",
