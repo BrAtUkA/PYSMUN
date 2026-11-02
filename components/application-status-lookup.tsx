@@ -126,7 +126,7 @@ export function ApplicationStatusLookup() {
 
   const lookup = async (event: FormEvent) => {
     event.preventDefault();
-    if (!/^(TC|CA|DR|DL|OB)-\d{2}-\d{4}$/.test(referenceCode)) {
+    if (!/^(TC|CA|DR|DL|OB|AC)-\d{2}-\d{4}$/.test(referenceCode)) {
       setMessage("Enter your Application ID, e.g. TC‑26‑1234.");
       return;
     }
